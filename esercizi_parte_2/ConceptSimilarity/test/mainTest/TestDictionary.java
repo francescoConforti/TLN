@@ -145,8 +145,8 @@ public class TestDictionary {
     } catch (IOException ex) {
       Logger.getLogger(TestDictionary.class.getName()).log(Level.SEVERE, null, ex);
     }
-    //test.getSynonyms(dict);
-    test.getHypernyms(dict);
+    test.getSynonyms(dict);
+    //test.getHypernyms(dict);
     
   }
 }

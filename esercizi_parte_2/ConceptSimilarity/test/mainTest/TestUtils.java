@@ -65,6 +65,21 @@ public class TestUtils {
     }
   }
   
+  private void testDistance(ISynsetID synset1, ISynsetID synset2){
+    Utils utils = new Utils(dict);
+    int n = utils.distance(synset1, synset2);
+    System.out.print("Distance between ");
+    utils.printSynsetID(synset1);
+    System.out.print(" and ");
+    utils.printSynsetID(synset2);
+    System.out.println(" is: " + n);
+  }
+  
+  private void testMaxDepth(){
+    Utils utils = new Utils(dict);
+    System.out.println("Max depth of the taxonomy: " + utils.maxDepth());
+  }
+  
   public static void main(String[] args){
     // create and open dictionary
     URL url;
@@ -81,17 +96,25 @@ public class TestUtils {
       Logger.getLogger(TestDictionary.class.getName()).log(Level.SEVERE, null, ex);
     }
     
-    // get synset for dog
-    IIndexWord idxWord = dict.getIndexWord("dog", POS.NOUN);
+    // get synset for a word
+    IIndexWord idxWord = dict.getIndexWord("entity", POS.NOUN);
     IWordID wordID = idxWord.getWordIDs().get(0); // 1 st meaning
     ISynsetID synset1 = wordID.getSynsetID();
-    wordID = idxWord.getWordIDs().get(1); // 2 nd meaning
+    // get synset for another word
+    idxWord = dict.getIndexWord("armchair", POS.NOUN);
+    wordID = idxWord.getWordIDs().get(0); // 1 st meaning
     ISynsetID synset2 = wordID.getSynsetID();
     
     // actual tests
     TestUtils t = new TestUtils(dict);
     t.testAllHypernyms(synset1);
+    System.out.println("");
     t.testDept(synset1);
+    System.out.println("");
     t.testLcs(synset1, synset2);
+    System.out.println("");
+    t.testDistance(synset1, synset2);
+    System.out.println("");
+    t.testMaxDepth();
   }
 }

@@ -6,8 +6,12 @@
 package conceptSimilarity;
 
 import edu.mit.jwi.IDictionary;
+import edu.mit.jwi.item.IIndexWord;
+import edu.mit.jwi.item.ISynset;
 import edu.mit.jwi.item.ISynsetID;
 import edu.mit.jwi.item.IWord;
+import edu.mit.jwi.item.IWordID;
+import edu.mit.jwi.item.POS;
 import edu.mit.jwi.item.Pointer;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -37,14 +41,16 @@ public class Utils {
    */
   public ISynsetID leastCommonAncestor(ISynsetID cs1, ISynsetID cs2){
     ISynsetID lca = null;
-    int minDepth = Integer.MAX_VALUE;
+    int maxDepth = Integer.MIN_VALUE, depth;
     List<ISynsetID> ancestors1 = allAncestors(cs1);
     List<ISynsetID> ancestors2 = allAncestors(cs2);
     for(ISynsetID anc1 : ancestors1){
       for(ISynsetID anc2 : ancestors2){
         if(anc1.equals(anc2)){
-          if(findDepth(anc1) < minDepth){
+          depth = findDepth(anc1);
+          if(depth > maxDepth){
             lca = anc1;
+            maxDepth = depth;
           }
         }
       }
@@ -78,7 +84,7 @@ public class Utils {
   }
   
   /**
-   * 
+   * Code mostly from DuckDuckGo
    * @param syn
    * @return depth of the synset
    */
@@ -106,6 +112,60 @@ public class Utils {
 		}
 		return depth;
 	}
+  
+  /**
+   *
+   * @param cs1
+   * @param cs2
+   * @return distance between the two synsets according to their depth
+   * using the hypernym relation
+   */
+  public int distance(ISynsetID cs1, ISynsetID cs2){
+    int dist, depth1, depth2, depthLca;
+    depth1 = findDepth(cs1);
+    depth2 = findDepth(cs2);
+    if((allAncestors(cs2)).contains(cs1)){  // cs2 is descendant of cs1
+      dist = depth2 - depth1;
+    }
+    else if((allAncestors(cs1)).contains(cs2)){  // cs1 is descendant of cs2
+      dist = depth1 - depth2;
+    }
+    else{ // cs1 and cs2 are not directly related
+      depthLca = findDepth(leastCommonAncestor(cs1, cs2));
+      dist = (depth1 - depthLca) + (depth2 - depthLca);
+    }
+    return dist;
+  }
+  
+  /**
+   *
+   * @return max depth of the taxonomy in wordnet
+   */
+  public int maxDepth(){
+    int depth = 0;
+    // get the root synset (entity)
+    IIndexWord idxWord = dict.getIndexWord("entity", POS.NOUN);
+    IWordID wordID = idxWord.getWordIDs().get(0); // 1 st and only meaning
+    IWord word = dict.getWord(wordID);
+    ISynset synset = word.getSynset();
+// get the hypernyms
+    List< ISynsetID> hyponyms
+            = synset.getRelatedSynsets(Pointer.HYPONYM);
+    for(ISynsetID hypo : hyponyms){
+      depth = Math.max(depth, maxDepthAux(hypo));
+    }
+    return depth;
+  }
+  
+  private int maxDepthAux(ISynsetID syn){
+    int depth = 0;
+    List< ISynsetID> hyponyms
+            = dict.getSynset(syn).getRelatedSynsets(Pointer.HYPONYM);
+    for(ISynsetID hypo : hyponyms){
+      depth = Math.max(depth, maxDepthAux(hypo));
+    }
+    return depth +1;
+  }
   
   /**
    * Code from the tutorial

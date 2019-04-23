@@ -19,11 +19,27 @@ public class Similarity {
     this.utils = utils;
   }
   
-  public float wuPalmer(ISynsetID cs1, ISynsetID cs2){
+  public double wuPalmer(ISynsetID cs1, ISynsetID cs2){
     int num, den;
     num = 2 * utils.findDepth(utils.leastCommonAncestor(cs1, cs2));
     den = utils.findDepth(cs1) + utils.findDepth(cs2);
     return num / den;
+  }
+  
+  /**
+   * return double for consistency with other measures
+   * @param cs1
+   * @param cs2
+   * @return
+   */
+  public double shortestPath(ISynsetID cs1, ISynsetID cs2){
+    return 2 * utils.maxDepth() - utils.distance(cs1, cs2);
+  }
+  
+  public double leakcockChodorow(ISynsetID cs1, ISynsetID cs2){
+    int num = utils.distance(cs1, cs2);
+    int den = 2 * utils.maxDepth();
+    return -Math.log(num / den);
   }
   
 }
