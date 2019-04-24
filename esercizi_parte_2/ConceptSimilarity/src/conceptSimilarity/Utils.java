@@ -88,7 +88,7 @@ public class Utils {
    * @param syn
    * @return depth of the synset
    */
-  public int findDepth(ISynsetID syn) {
+  public int findDepth(ISynsetID syn){
 		if (dict.getSynset(syn).getRelatedSynsets(Pointer.HYPERNYM).isEmpty()) { return 0; }
 		List<Set<ISynsetID>> list = new ArrayList<>();
 		Set<ISynsetID> set = new HashSet<>();

@@ -42,4 +42,30 @@ public class Similarity {
     return -Math.log(num / den);
   }
   
+  /**
+   * x and y must have the same length
+   * @param x
+   * @param y
+   * @return Pearson correlation coefficient
+   */
+  public double pearson(double[] x, double[] y){
+    double num = Statistics.covariance(x, y, x.length);
+    double den = Statistics.standardDeviation(x) * Statistics.standardDeviation(y);
+    return num / den;
+  }
+  
+  /**
+   * x and y must have the same length
+   * @param x
+   * @param y
+   * @return spearman rank correlation coefficient
+   */
+  public double spearman(double[] x, double[] y){
+    double[] xRanks = Statistics.ranks(x);
+    double[] yRanks = Statistics.ranks(y);
+    double num = Statistics.covariance(xRanks, yRanks, xRanks.length);
+    double den = Statistics.standardDeviation(xRanks) * Statistics.standardDeviation(yRanks);
+    return num / den;
+  }
+  
 }
