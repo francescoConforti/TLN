@@ -23,7 +23,7 @@ public class Similarity {
     int num, den;
     num = 2 * utils.findDepth(utils.leastCommonAncestor(cs1, cs2));
     den = utils.findDepth(cs1) + utils.findDepth(cs2);
-    return num / den;
+    return (double)num / den;
   }
   
   /**
@@ -33,13 +33,16 @@ public class Similarity {
    * @return
    */
   public double shortestPath(ISynsetID cs1, ISynsetID cs2){
-    return 2 * utils.maxDepth() - utils.distance(cs1, cs2);
+    //return (double)(2 * utils.maxDepth() - utils.distance(cs1, cs2));
+    return (double)(2 * 19 - utils.distance(cs1, cs2));  // removing the computation greatly improves performance
   }
   
   public double leakcockChodorow(ISynsetID cs1, ISynsetID cs2){
-    int num = utils.distance(cs1, cs2);
-    int den = 2 * utils.maxDepth();
-    return -Math.log(num / den);
+    double num = utils.distance(cs1, cs2);
+    //double den = 2 * utils.maxDepth();
+    double den = 2 * 19;  // removing the computation greatly improves performance
+    double n = num / den;
+    return -Math.log(n);
   }
   
   /**

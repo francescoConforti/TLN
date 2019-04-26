@@ -36,8 +36,8 @@ public class CSMain {
     List<Double> results = new ArrayList<>();
     double[] valuesArr;
     double[] resultsArr;
-    double maxSimilarityVal = Double.MIN_VALUE;
-    double similarityVal = Double.MIN_VALUE;
+    double maxSimilarityVal = Double.NEGATIVE_INFINITY;
+    double similarityVal;
     
     // create and open dictionary
     URL url = null;
@@ -75,12 +75,13 @@ public class CSMain {
     } catch (IOException ex) {
       Logger.getLogger(CSMain.class.getName()).log(Level.SEVERE, null, ex);
     }
-    /*
+    
     // Wu & Palmer
     for (int i = 0; i < words1.size(); ++i) { // for every row
       List<IWordID> wordID1 = null;
       List<IWordID> wordID2 = null;
       boolean exception = false;
+      maxSimilarityVal = Double.NEGATIVE_INFINITY;
       try {
         IIndexWord idxWord1 = dict.getIndexWord(words1.get(i), POS.NOUN);
         wordID1 = idxWord1.getWordIDs();
@@ -94,13 +95,12 @@ public class CSMain {
       if (!exception) {
         for (IWordID w1 : wordID1) {  // for each sense of the first word
           for (IWordID w2 : wordID2) {  // for each sense of the second word
-            maxSimilarityVal = Double.MIN_VALUE;
             ISynsetID syn1 = w1.getSynsetID();
             ISynsetID syn2 = w2.getSynsetID();
             try {
-              similarityVal = sim.wuPalmer(syn1, syn2);
+              similarityVal = sim.wuPalmer(syn1, syn2) * 10; // in the input file values are 0-10
             } catch (NullPointerException e) {  // this happens even if synsets are not null
-              similarityVal = Double.MIN_VALUE;
+              similarityVal = 0;
             }
             if (similarityVal > maxSimilarityVal) {
               maxSimilarityVal = similarityVal;
@@ -126,13 +126,13 @@ public class CSMain {
     System.out.println(sim.spearman(valuesArr, resultsArr));
     
     results.clear();
-    */
     
     // shortest path
     for (int i = 0; i < words1.size(); ++i) { // for every row
       List<IWordID> wordID1 = null;
       List<IWordID> wordID2 = null;
       boolean exception = false;
+      maxSimilarityVal = Double.NEGATIVE_INFINITY;
       try {
         IIndexWord idxWord1 = dict.getIndexWord(words1.get(i), POS.NOUN);
         wordID1 = idxWord1.getWordIDs();
@@ -146,13 +146,12 @@ public class CSMain {
       if (!exception) {
         for (IWordID w1 : wordID1) {  // for each sense of the first word
           for (IWordID w2 : wordID2) {  // for each sense of the second word
-            maxSimilarityVal = Double.MIN_VALUE;
             ISynsetID syn1 = w1.getSynsetID();
             ISynsetID syn2 = w2.getSynsetID();
             try {
-              similarityVal = sim.shortestPath(syn1, syn2);
+              similarityVal = sim.shortestPath(syn1, syn2) / 10;
             } catch (NullPointerException e) {  // this happens even if synsets are not null
-              similarityVal = Double.MIN_VALUE;
+              similarityVal = 0;
             }
             if (similarityVal > maxSimilarityVal) {
               maxSimilarityVal = similarityVal;
@@ -175,6 +174,57 @@ public class CSMain {
     System.out.print("Pearson using shortest path: ");
     System.out.println(sim.pearson(valuesArr, resultsArr));
     System.out.print("Spearman using shortest path: ");
+    System.out.println(sim.spearman(valuesArr, resultsArr));
+    
+    results.clear();
+    
+    // leakcock chodorow
+    for (int i = 0; i < words1.size(); ++i) { // for every row
+      List<IWordID> wordID1 = null;
+      List<IWordID> wordID2 = null;
+      boolean exception = false;
+      maxSimilarityVal = Double.NEGATIVE_INFINITY;
+      try {
+        IIndexWord idxWord1 = dict.getIndexWord(words1.get(i), POS.NOUN);
+        wordID1 = idxWord1.getWordIDs();
+        IIndexWord idxWord2 = dict.getIndexWord(words2.get(i), POS.NOUN);
+        wordID2 = idxWord2.getWordIDs();
+      }
+      catch(NullPointerException e){
+        results.add(new Double(0));
+        exception = true;
+      }
+      if (!exception) {
+        for (IWordID w1 : wordID1) {  // for each sense of the first word
+          for (IWordID w2 : wordID2) {  // for each sense of the second word
+            ISynsetID syn1 = w1.getSynsetID();
+            ISynsetID syn2 = w2.getSynsetID();
+            try {
+              similarityVal = sim.leakcockChodorow(syn1, syn2) * 10; // in the input file values are 0-10
+            } catch (NullPointerException e) {  // this happens even if synsets are not null
+              similarityVal = 0;
+            }
+            if (similarityVal > maxSimilarityVal) {
+              maxSimilarityVal = similarityVal;
+            }
+          }
+        }
+        results.add(maxSimilarityVal);
+      }
+    }
+    // Transform collections into arrays
+    valuesArr = new double[values.size()];
+    for (int i = 0; i < valuesArr.length; i++) {
+      valuesArr[i] = values.get(i);
+    }
+    resultsArr = new double[results.size()];
+    for (int i = 0; i < resultsArr.length; i++) {
+      resultsArr[i] = results.get(i);
+    }
+    // show results
+    System.out.print("Pearson using Leakcock & Chodorow: ");
+    System.out.println(sim.pearson(valuesArr, resultsArr));
+    System.out.print("Spearman using Leakcock & Chodorow: ");
     System.out.println(sim.spearman(valuesArr, resultsArr));
   }
 
