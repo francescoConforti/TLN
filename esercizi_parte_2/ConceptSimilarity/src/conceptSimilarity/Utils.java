@@ -125,14 +125,14 @@ public class Utils {
     depth1 = findDepth(cs1);
     depth2 = findDepth(cs2);
     if((allAncestors(cs2)).contains(cs1)){  // cs2 is descendant of cs1
-      dist = depth2 - depth1;
+      dist = Math.abs(depth2 - depth1);
     }
     else if((allAncestors(cs1)).contains(cs2)){  // cs1 is descendant of cs2
-      dist = depth1 - depth2;
+      dist = Math.abs(depth1 - depth2);
     }
     else{ // cs1 and cs2 are not directly related
       depthLca = findDepth(leastCommonAncestor(cs1, cs2));
-      dist = (depth1 - depthLca) + (depth2 - depthLca);
+      dist = Math.abs(depth1 - depthLca) + Math.abs(depth2 - depthLca);
     }
     return dist;
   }

@@ -42,6 +42,9 @@ public class Similarity {
     //double den = 2 * utils.maxDepth();
     double den = 2 * 19;  // removing the computation greatly improves performance
     double n = num / den;
+    if(n <= 0){
+      n = Double.MIN_VALUE;
+    }
     return -Math.log(n);
   }
   
