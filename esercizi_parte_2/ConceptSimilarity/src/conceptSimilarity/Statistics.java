@@ -11,7 +11,7 @@ import java.util.Arrays;
 
 // covariance of two set.
 
-class Statistics { 
+public class Statistics { 
 
 // Function to find mean. 
 public static double mean(double arr[], int n) 
@@ -84,6 +84,10 @@ public static double[] ranks(double[] arr) {
     }
 
     return ranks;
+}
+
+public static double normalize(double min, double max, double val){
+  return (val - min) / (max - min);
 }
 
 // Driver code 

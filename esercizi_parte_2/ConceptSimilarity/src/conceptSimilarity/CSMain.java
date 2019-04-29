@@ -149,7 +149,7 @@ public class CSMain {
             ISynsetID syn1 = w1.getSynsetID();
             ISynsetID syn2 = w2.getSynsetID();
             try {
-              similarityVal = sim.shortestPath(syn1, syn2) / 10;
+              similarityVal = Statistics.normalize(0, 2*19, sim.shortestPath(syn1, syn2));
             } catch (NullPointerException e) {  // this happens even if synsets are not null
               similarityVal = 0;
             }
@@ -200,7 +200,7 @@ public class CSMain {
             ISynsetID syn1 = w1.getSynsetID();
             ISynsetID syn2 = w2.getSynsetID();
             try {
-              similarityVal = sim.leakcockChodorow(syn1, syn2) * 10; // in the input file values are 0-10
+              similarityVal = Statistics.normalize(0, Math.log(2*19+1), sim.leakcockChodorow(syn1, syn2));
             } catch (NullPointerException e) {  // this happens even if synsets are not null
               similarityVal = 0;
             }

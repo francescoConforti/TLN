@@ -132,7 +132,7 @@ public class Utils {
     }
     else{ // cs1 and cs2 are not directly related
       depthLca = findDepth(leastCommonAncestor(cs1, cs2));
-      dist = Math.abs(depth1 - depthLca) + Math.abs(depth2 - depthLca);
+      dist = (depth1 - depthLca) + (depth2 - depthLca);
     }
     return dist;
   }

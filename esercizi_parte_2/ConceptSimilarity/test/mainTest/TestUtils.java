@@ -5,6 +5,8 @@
  */
 package mainTest;
 
+import conceptSimilarity.Similarity;
+import conceptSimilarity.Statistics;
 import conceptSimilarity.Utils;
 import edu.mit.jwi.Dictionary;
 import edu.mit.jwi.IDictionary;
@@ -78,6 +80,36 @@ public class TestUtils {
     System.out.println("Max depth of the taxonomy: " + utils.maxDepth());
   }
   
+  private void testWuPalmer(ISynsetID synset1, ISynsetID synset2){
+    Utils utils = new Utils(dict);
+    Similarity similarity = new Similarity(utils);
+    System.out.println("wuPalmer: " + similarity.wuPalmer(synset1, synset2));
+  }
+
+  private void testShortestPath(ISynsetID synset1, ISynsetID synset2){
+    Utils utils = new Utils(dict);
+    Similarity similarity = new Similarity(utils);
+    System.out.println("shortestPath: " + similarity.shortestPath(synset1, synset2));
+  }
+  
+  private void testShortestPathNormalized(ISynsetID synset1, ISynsetID synset2){
+    Utils utils = new Utils(dict);
+    Similarity similarity = new Similarity(utils);
+    System.out.println("normalized shortestPath: " + Statistics.normalize(0, 2*19, similarity.shortestPath(synset1, synset2)));
+  }
+
+  private void testLC(ISynsetID synset1, ISynsetID synset2){
+    Utils utils = new Utils(dict);
+    Similarity similarity = new Similarity(utils);
+    System.out.println("leakcockChodorow: " + similarity.leakcockChodorow(synset1, synset2));
+  }
+  
+  private void testLCNormalized(ISynsetID synset1, ISynsetID synset2){
+    Utils utils = new Utils(dict);
+    Similarity similarity = new Similarity(utils);
+    System.out.println("normalized leakcockChodorow: " + Statistics.normalize(0, Math.log((2*19)+1), similarity.leakcockChodorow(synset1, synset2)));
+  }
+  
   public static void main(String[] args){
     // create and open dictionary
     URL url;
@@ -95,11 +127,11 @@ public class TestUtils {
     }
     
     // get synset for a word
-    IIndexWord idxWord = dict.getIndexWord("entity", POS.NOUN);
+    IIndexWord idxWord = dict.getIndexWord("dog", POS.NOUN);
     IWordID wordID = idxWord.getWordIDs().get(0); // 1 st meaning
     ISynsetID synset1 = wordID.getSynsetID();
     // get synset for another word
-    idxWord = dict.getIndexWord("armchair", POS.NOUN);
+    idxWord = dict.getIndexWord("wolf", POS.NOUN);
     wordID = idxWord.getWordIDs().get(0); // 1 st meaning
     ISynsetID synset2 = wordID.getSynsetID();
     
@@ -114,5 +146,11 @@ public class TestUtils {
     t.testDistance(synset1, synset2);
     System.out.println("");
     t.testMaxDepth();
+    t.testWuPalmer(synset1, synset2);
+    t.testShortestPath(synset1, synset2);
+    t.testShortestPathNormalized(synset1, synset2);
+    t.testLC(synset1, synset2);
+    t.testLCNormalized(synset1, synset2);
+    System.out.println(Math.log(2*19+1));
   }
 }
