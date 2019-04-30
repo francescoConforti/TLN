@@ -86,7 +86,7 @@ public class Utils {
   /**
    * Code mostly from DuckDuckGo
    * @param syn
-   * @return depth of the synset
+   * @return minimum depth of the synset
    */
   public int findDepth(ISynsetID syn){
 		if (dict.getSynset(syn).getRelatedSynsets(Pointer.HYPERNYM).isEmpty()) { return 0; }
@@ -121,20 +121,47 @@ public class Utils {
    * using the hypernym relation
    */
   public int distance(ISynsetID cs1, ISynsetID cs2){
-    int dist, depth1, depth2, depthLca;
-    depth1 = findDepth(cs1);
-    depth2 = findDepth(cs2);
+    int dist;
     if((allAncestors(cs2)).contains(cs1)){  // cs2 is descendant of cs1
-      dist = Math.abs(depth2 - depth1);
+      dist = descendantDistance(cs1, cs2);
     }
     else if((allAncestors(cs1)).contains(cs2)){  // cs1 is descendant of cs2
-      dist = Math.abs(depth1 - depth2);
+      dist = descendantDistance(cs2, cs1);
     }
     else{ // cs1 and cs2 are not directly related
-      depthLca = findDepth(leastCommonAncestor(cs1, cs2));
-      dist = (depth1 - depthLca) + (depth2 - depthLca);
+      ISynsetID lca = leastCommonAncestor(cs1, cs2);
+      int dist1, dist2;
+      dist1 = descendantDistance(lca, cs1);
+      dist2 = descendantDistance(lca, cs2);
+      dist = dist1 + dist2;
     }
     return dist;
+  }
+  
+  public int descendantDistance(ISynsetID ancestor, ISynsetID descendant){
+    if(ancestor.equals(descendant)){
+      return 0;
+    }
+    int distance = Integer.MAX_VALUE;
+    List< ISynsetID> hyponyms
+            = dict.getSynset(ancestor).getRelatedSynsets(Pointer.HYPONYM);
+    for(ISynsetID hypo : hyponyms){
+      distance = Math.min(distance, descendantDistanceAux(hypo));
+    }
+    return distance;
+  }
+  
+  private int descendantDistanceAux(ISynsetID descendant){
+    int distance = Integer.MAX_VALUE;
+    List< ISynsetID> hyponyms
+            = dict.getSynset(descendant).getRelatedSynsets(Pointer.HYPONYM);
+    for(ISynsetID hypo : hyponyms){
+      if(hypo.equals(descendant)){
+        return 1;
+      }
+      distance = Math.min(distance, maxDepthAux(hypo));
+    }
+    return distance;
   }
   
   /**
@@ -148,7 +175,7 @@ public class Utils {
     IWordID wordID = idxWord.getWordIDs().get(0); // 1 st and only meaning
     IWord word = dict.getWord(wordID);
     ISynset synset = word.getSynset();
-// get the hypernyms
+// get the hyponyms
     List< ISynsetID> hyponyms
             = synset.getRelatedSynsets(Pointer.HYPONYM);
     for(ISynsetID hypo : hyponyms){

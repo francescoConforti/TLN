@@ -127,11 +127,11 @@ public class TestUtils {
     }
     
     // get synset for a word
-    IIndexWord idxWord = dict.getIndexWord("dog", POS.NOUN);
-    IWordID wordID = idxWord.getWordIDs().get(0); // 1 st meaning
+    IIndexWord idxWord = dict.getIndexWord("tiger", POS.NOUN);
+    IWordID wordID = idxWord.getWordIDs().get(1); // 1 st meaning
     ISynsetID synset1 = wordID.getSynsetID();
     // get synset for another word
-    idxWord = dict.getIndexWord("wolf", POS.NOUN);
+    idxWord = dict.getIndexWord("zoo", POS.NOUN);
     wordID = idxWord.getWordIDs().get(0); // 1 st meaning
     ISynsetID synset2 = wordID.getSynsetID();
     
@@ -151,6 +151,5 @@ public class TestUtils {
     t.testShortestPathNormalized(synset1, synset2);
     t.testLC(synset1, synset2);
     t.testLCNormalized(synset1, synset2);
-    System.out.println(Math.log(2*19+1));
   }
 }

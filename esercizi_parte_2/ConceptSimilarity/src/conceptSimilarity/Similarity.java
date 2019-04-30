@@ -20,10 +20,12 @@ public class Similarity {
   }
   
   public double wuPalmer(ISynsetID cs1, ISynsetID cs2){
-    int num, den;
-    num = 2 * utils.findDepth(utils.leastCommonAncestor(cs1, cs2));
-    den = utils.findDepth(cs1) + utils.findDepth(cs2);
-    return (double)num / den;
+    double num, den;
+    ISynsetID lca = utils.leastCommonAncestor(cs1, cs2);
+    int depthLca = utils.findDepth(lca);
+    num = 2 * depthLca;
+    den = (depthLca + utils.descendantDistance(lca, cs1)) + (depthLca + utils.descendantDistance(lca, cs2));
+    return (double)(num / den);
   }
   
   /**
@@ -38,13 +40,13 @@ public class Similarity {
   }
   
   public double leakcockChodorow(ISynsetID cs1, ISynsetID cs2){
-    double num = utils.distance(cs1, cs2);
+    double num = utils.distance(cs1, cs2) + 1;
     //double den = 2 * utils.maxDepth();
-    double den = 2 * 19;  // removing the computation greatly improves performance
+    double den = 2 * 19 + 1;  // removing the computation greatly improves performance
     double n = num / den;
-    if(n <= 0){
+    /*if(n <= 0){
       n = Double.MIN_VALUE;
-    }
+    }*/
     return -Math.log(n);
   }
   
