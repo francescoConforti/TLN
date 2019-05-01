@@ -40,6 +40,9 @@ public class Utils {
    * @return least common ancestor if it exists, null otherwise
    */
   public ISynsetID leastCommonAncestor(ISynsetID cs1, ISynsetID cs2){
+    if(cs1.equals(cs2)){
+      return cs1;
+    }
     ISynsetID lca = null;
     int maxDepth = Integer.MIN_VALUE, depth;
     List<ISynsetID> ancestors1 = allAncestors(cs1);
@@ -68,7 +71,7 @@ public class Utils {
     Set<ISynsetID> res = new HashSet<>();
     Queue<ISynsetID> q = new LinkedList<>();
     List<ISynsetID> hypernyms;
-    res.add(syn);
+    res.add(syn); // Moved to leastCommonAncestor method
     q.add(syn);
     // Store all hypernyms in a queue and go up until root for each sense
     while(!q.isEmpty()){
@@ -142,27 +145,30 @@ public class Utils {
     if(ancestor.equals(descendant)){
       return 0;
     }
-    int distance = Integer.MAX_VALUE;
-    List< ISynsetID> hyponyms
+    int distance = 1000;
+    List<ISynsetID> hyponyms
             = dict.getSynset(ancestor).getRelatedSynsets(Pointer.HYPONYM);
-    for(ISynsetID hypo : hyponyms){
-      distance = Math.min(distance, descendantDistanceAux(hypo));
-    }
-    return distance;
-  }
-  
-  private int descendantDistanceAux(ISynsetID descendant){
-    int distance = Integer.MAX_VALUE;
-    List< ISynsetID> hyponyms
-            = dict.getSynset(descendant).getRelatedSynsets(Pointer.HYPONYM);
     for(ISynsetID hypo : hyponyms){
       if(hypo.equals(descendant)){
         return 1;
       }
-      distance = Math.min(distance, maxDepthAux(hypo));
+      distance = Math.min(distance, descendantDistanceAux(hypo, descendant));
     }
     return distance;
   }
+  
+  private int descendantDistanceAux(ISynsetID ancestor, ISynsetID descendant){
+    int distance = 1000;
+    List<ISynsetID> hyponyms
+            = dict.getSynset(ancestor).getRelatedSynsets(Pointer.HYPONYM);
+    for(ISynsetID hypo : hyponyms){
+      if(hypo.equals(descendant)){
+        return 1;
+      }
+      distance = Math.min(distance, descendantDistanceAux(hypo, descendant));
+    }
+    return distance + 1;
+}
   
   /**
    *

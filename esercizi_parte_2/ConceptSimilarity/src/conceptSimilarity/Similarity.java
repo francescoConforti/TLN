@@ -22,10 +22,12 @@ public class Similarity {
   public double wuPalmer(ISynsetID cs1, ISynsetID cs2){
     double num, den;
     ISynsetID lca = utils.leastCommonAncestor(cs1, cs2);
-    int depthLca = utils.findDepth(lca);
-    num = 2 * depthLca;
-    den = (depthLca + utils.descendantDistance(lca, cs1)) + (depthLca + utils.descendantDistance(lca, cs2));
-    return (double)(num / den);
+    int depthLca = utils.findDepth(lca), dist1, dist2;
+    num = (2 * depthLca) +1;
+    dist1 = utils.descendantDistance(lca, cs1);
+    dist2 = utils.descendantDistance(lca, cs2);
+    den = (depthLca + dist1) + (depthLca + dist2) +1;
+    return (num / den);
   }
   
   /**
@@ -44,9 +46,6 @@ public class Similarity {
     //double den = 2 * utils.maxDepth();
     double den = 2 * 19 + 1;  // removing the computation greatly improves performance
     double n = num / den;
-    /*if(n <= 0){
-      n = Double.MIN_VALUE;
-    }*/
     return -Math.log(n);
   }
   
