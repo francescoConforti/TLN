@@ -33,11 +33,13 @@ public class CSMain {
     List<String> words1 = new ArrayList<>();
     List<String> words2 = new ArrayList<>();
     List<Double> values = new ArrayList<>();
-    List<Double> results = new ArrayList<>();
+    List<Double> wpResults = new ArrayList<>();
+    List<Double> spResults = new ArrayList<>();
+    List<Double> lcResults = new ArrayList<>();
     double[] valuesArr;
-    double[] resultsArr;
-    double maxSimilarityVal = Double.NEGATIVE_INFINITY;
-    double similarityVal;
+    double[] wpArr, spArr, lcArr;
+    double wpMaxVal, spMaxVal, lcMaxVal;
+    double wpVal, spVal, lcVal;
     
     // create and open dictionary
     URL url = null;
@@ -76,12 +78,13 @@ public class CSMain {
       Logger.getLogger(CSMain.class.getName()).log(Level.SEVERE, null, ex);
     }
     
-    // Wu & Palmer
     for (int i = 0; i < words1.size(); ++i) { // for every row
       List<IWordID> wordID1 = null;
       List<IWordID> wordID2 = null;
       boolean exception = false;
-      maxSimilarityVal = Double.NEGATIVE_INFINITY;
+      wpMaxVal = Double.NEGATIVE_INFINITY;
+      spMaxVal = Double.NEGATIVE_INFINITY;
+      lcMaxVal = Double.NEGATIVE_INFINITY;
       try {
         IIndexWord idxWord1 = dict.getIndexWord(words1.get(i), POS.NOUN);
         wordID1 = idxWord1.getWordIDs();
@@ -89,7 +92,9 @@ public class CSMain {
         wordID2 = idxWord2.getWordIDs();
       }
       catch(NullPointerException e){
-        results.add(new Double(0));
+        wpResults.add(new Double(0));
+        spResults.add(new Double(0));
+        lcResults.add(new Double(0));
         exception = true;
       }
       if (!exception) {
@@ -98,134 +103,60 @@ public class CSMain {
             ISynsetID syn1 = w1.getSynsetID();
             ISynsetID syn2 = w2.getSynsetID();
             try {
-              similarityVal = sim.wuPalmer(syn1, syn2) * 10; // in the input file values are 0-10
+              wpVal = sim.wuPalmer(syn1, syn2);
+              spVal = Statistics.normalize(0, 2*19, sim.shortestPath(syn1, syn2));
+              lcVal = Statistics.normalize(0, Math.log(2*19+1), sim.leakcockChodorow(syn1, syn2));
             } catch (NullPointerException e) {  // this happens even if synsets are not null
-              similarityVal = 0;
+              wpVal = spVal = lcVal = 0;
             }
-            if (similarityVal > maxSimilarityVal) {
-              maxSimilarityVal = similarityVal;
+            if (wpVal > wpMaxVal) {
+              wpMaxVal = wpVal;
+            }
+            if (spVal > spMaxVal) {
+              spMaxVal = spVal;
+            }
+            if (lcVal > lcMaxVal) {
+              lcMaxVal = lcVal;
             }
           }
         }
-        results.add(maxSimilarityVal);
+        wpResults.add(wpMaxVal);
+        spResults.add(spMaxVal);
+        lcResults.add(lcMaxVal);
       }
     }
     // Transform collections into arrays
     valuesArr = new double[values.size()];
     for (int i = 0; i < valuesArr.length; i++) {
-      valuesArr[i] = values.get(i);
+      valuesArr[i] = values.get(i) / 10; // in the input file values are 0-10
     }
-    resultsArr = new double[results.size()];
-    for (int i = 0; i < resultsArr.length; i++) {
-      resultsArr[i] = results.get(i);
+    wpArr = new double[wpResults.size()];
+    for (int i = 0; i < wpArr.length; i++) {
+      wpArr[i] = wpResults.get(i);
+    }
+    spArr = new double[spResults.size()];
+    for (int i = 0; i < spArr.length; i++) {
+      spArr[i] = spResults.get(i);
+    }
+    lcArr = new double[lcResults.size()];
+    for (int i = 0; i < lcArr.length; i++) {
+      lcArr[i] = lcResults.get(i);
     }
     // show results
     System.out.print("Pearson using Wu & Palmer: ");
-    System.out.println(sim.pearson(valuesArr, resultsArr));
+    System.out.println(sim.pearson(valuesArr, wpArr));
     System.out.print("Spearman using Wu & Palmer: ");
-    System.out.println(sim.spearman(valuesArr, resultsArr));
+    System.out.println(sim.spearman(valuesArr, wpArr));
     
-    results.clear();
-    
-    // shortest path
-    for (int i = 0; i < words1.size(); ++i) { // for every row
-      List<IWordID> wordID1 = null;
-      List<IWordID> wordID2 = null;
-      boolean exception = false;
-      maxSimilarityVal = Double.NEGATIVE_INFINITY;
-      try {
-        IIndexWord idxWord1 = dict.getIndexWord(words1.get(i), POS.NOUN);
-        wordID1 = idxWord1.getWordIDs();
-        IIndexWord idxWord2 = dict.getIndexWord(words2.get(i), POS.NOUN);
-        wordID2 = idxWord2.getWordIDs();
-      }
-      catch(NullPointerException e){
-        results.add(new Double(0));
-        exception = true;
-      }
-      if (!exception) {
-        for (IWordID w1 : wordID1) {  // for each sense of the first word
-          for (IWordID w2 : wordID2) {  // for each sense of the second word
-            ISynsetID syn1 = w1.getSynsetID();
-            ISynsetID syn2 = w2.getSynsetID();
-            try {
-              similarityVal = Statistics.normalize(0, 2*19, sim.shortestPath(syn1, syn2));
-            } catch (NullPointerException e) {  // this happens even if synsets are not null
-              similarityVal = 0;
-            }
-            if (similarityVal > maxSimilarityVal) {
-              maxSimilarityVal = similarityVal;
-            }
-          }
-        }
-        results.add(maxSimilarityVal);
-      }
-    }
-    // Transform collections into arrays
-    valuesArr = new double[values.size()];
-    for (int i = 0; i < valuesArr.length; i++) {
-      valuesArr[i] = values.get(i);
-    }
-    resultsArr = new double[results.size()];
-    for (int i = 0; i < resultsArr.length; i++) {
-      resultsArr[i] = results.get(i);
-    }
-    // show results
     System.out.print("Pearson using shortest path: ");
-    System.out.println(sim.pearson(valuesArr, resultsArr));
+    System.out.println(sim.pearson(valuesArr, spArr));
     System.out.print("Spearman using shortest path: ");
-    System.out.println(sim.spearman(valuesArr, resultsArr));
+    System.out.println(sim.spearman(valuesArr, spArr));
     
-    results.clear();
-    
-    // leakcock chodorow
-    for (int i = 0; i < words1.size(); ++i) { // for every row
-      List<IWordID> wordID1 = null;
-      List<IWordID> wordID2 = null;
-      boolean exception = false;
-      maxSimilarityVal = Double.NEGATIVE_INFINITY;
-      try {
-        IIndexWord idxWord1 = dict.getIndexWord(words1.get(i), POS.NOUN);
-        wordID1 = idxWord1.getWordIDs();
-        IIndexWord idxWord2 = dict.getIndexWord(words2.get(i), POS.NOUN);
-        wordID2 = idxWord2.getWordIDs();
-      }
-      catch(NullPointerException e){
-        results.add(new Double(0));
-        exception = true;
-      }
-      if (!exception) {
-        for (IWordID w1 : wordID1) {  // for each sense of the first word
-          for (IWordID w2 : wordID2) {  // for each sense of the second word
-            ISynsetID syn1 = w1.getSynsetID();
-            ISynsetID syn2 = w2.getSynsetID();
-            try {
-              similarityVal = Statistics.normalize(0, Math.log(2*19+1), sim.leakcockChodorow(syn1, syn2));
-            } catch (NullPointerException e) {  // this happens even if synsets are not null
-              similarityVal = 0;
-            }
-            if (similarityVal > maxSimilarityVal) {
-              maxSimilarityVal = similarityVal;
-            }
-          }
-        }
-        results.add(maxSimilarityVal);
-      }
-    }
-    // Transform collections into arrays
-    valuesArr = new double[values.size()];
-    for (int i = 0; i < valuesArr.length; i++) {
-      valuesArr[i] = values.get(i);
-    }
-    resultsArr = new double[results.size()];
-    for (int i = 0; i < resultsArr.length; i++) {
-      resultsArr[i] = results.get(i);
-    }
-    // show results
     System.out.print("Pearson using Leakcock & Chodorow: ");
-    System.out.println(sim.pearson(valuesArr, resultsArr));
+    System.out.println(sim.pearson(valuesArr, lcArr));
     System.out.print("Spearman using Leakcock & Chodorow: ");
-    System.out.println(sim.spearman(valuesArr, resultsArr));
+    System.out.println(sim.spearman(valuesArr, lcArr));
   }
 
 }
