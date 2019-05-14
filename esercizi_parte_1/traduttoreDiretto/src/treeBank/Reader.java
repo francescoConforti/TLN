@@ -56,7 +56,7 @@ public class Reader {
   public static Map<String, Map<String, Integer>> treeBankToTagTransitions(String path) {
     Map<String, Map<String, Integer>> transitions = new HashMap<>();
     try (BufferedReader br = new BufferedReader(new FileReader(path))) {
-      String line, prevPos, pos = null;
+      String line, prevPos, pos = "START";
       String[] splits;
       Map<String, Integer> tmp;
       while ((line = br.readLine()) != null) {
@@ -79,7 +79,7 @@ public class Reader {
             }
           }
         } else {  // the sentence in the treebank is finished
-          pos = prevPos = null;
+          pos = prevPos = "START";
         }
       }
     } catch (FileNotFoundException ex) {
@@ -95,6 +95,16 @@ public class Reader {
     if (map.containsKey(word)) {
       for (Integer num : map.get(word).values()) {
         res += num;
+      }
+    }
+    return res;
+  }
+  
+  public static int countWordPos(Map<String, Map<String, Integer>> map, String word, String pos){
+    int res = 0;
+    if (map.containsKey(word)) {
+      if(map.get(word).containsKey(pos)){
+        res = map.get(word).get(pos);
       }
     }
     return res;
@@ -127,13 +137,14 @@ public class Reader {
    */
   public static void main(String[] args) {
     String path = "/home/confo/UNI/magistrale/TLN/esercizi_parte_1/traduttoreDirect/universal_dependency/ud-treebanks-v2.3/UD_English-GUM/en_gum-ud-dev.conllu";
-    final String TESTWORD = "be", TESTPOS = "AUX", PRECPOS = "PRON";
+    final String TESTWORD = "be", TESTPOS = "NOUN", PRECPOS = "START";
     Map<String, Map<String, Integer>> map = Reader.treeBankToMap(path);
     Map<String, Map<String, Integer>> transitions = Reader.treeBankToTagTransitions(path);
     System.out.println(map);
     System.out.println(transitions);
     System.out.println("Values for \"" + TESTWORD + "\": " + map.get(TESTWORD));
     System.out.println("word \"" + TESTWORD + "\" appears " + Reader.countWord(map, TESTWORD) + " times");
+    System.out.println("word \"" + TESTWORD + "\" appears with pos " + TESTPOS + " " + Reader.countWordPos(map, TESTWORD, TESTPOS) + " times");
     System.out.println("Pos " + TESTPOS + " appears " + Reader.countPos(map, TESTPOS) + " times");
     System.out.println("Pos " + TESTPOS + " appears after " + PRECPOS + " " + Reader.countTransition(transitions, TESTPOS, PRECPOS) + " times");
   }
