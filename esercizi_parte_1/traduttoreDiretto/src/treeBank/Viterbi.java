@@ -5,6 +5,8 @@
  */
 package treeBank;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -31,9 +33,11 @@ public class Viterbi {
   }
   
   public List<Pair> viterbi(String text){
+    List<Pair> res = new ArrayList<>();
     String[] words = text.split("(?=\\p{Punct})|(?<=\\p{Punct})|\\W");  // split on whitespace and punctuation, keeping punctuation
     double[][] viterbiMatrix = new double[Pos.values().length][words.length]; // Start and End already in Pos (first and last)
     int[][] backpointer = new int[Pos.values().length][words.length];
+    double currentViterbi, currentBackpointer, maxBackpointer = 0;
     Pos[] posValues = Pos.values().clone(); // for efficiency
     // initialization step
     for(int s = 1; s < posValues.length -1; ++s){ // don't consider START and END
@@ -45,7 +49,6 @@ public class Viterbi {
     // recursion step
     for(int t = 1; t < words.length; ++t){  // t = 0 in initialization
       for(int s = 1; s < posValues.length -1; ++s){ // don't consider START and END
-        double currentViterbi, currentBackpointer, maxBackpointer = 0;
         for(int sprec = 1; sprec < posValues.length -1; ++sprec){
           double a = posPosProbability(posValues[s].name(), posValues[sprec].name());
           double b = posWordProbability(words[t], posValues[s].name());
@@ -59,28 +62,31 @@ public class Viterbi {
             backpointer[s][t] = sprec;
           }
         }
+        maxBackpointer = 0;
       }
     }
-    // TODO: termination step
-    return null;
-  }
-  
-  public class Pair{
-    
-    private final String word, pos;
-    
-    public Pair(String word, String pos){
-      this.word = word;
-      this.pos = pos;
+    // termination step
+    for (int s = 1; s < posValues.length - 1; ++s) {
+      double a = posPosProbability(Pos.END.name(), posValues[s].name());
+      currentViterbi = viterbiMatrix[s][words.length-1] * a;
+      if (currentViterbi > viterbiMatrix[s][words.length-1]) {
+        viterbiMatrix[s][words.length-1] = currentViterbi;
+      }
+      // here currentViterbi and currentBackpointer are the same
+      if (currentViterbi > maxBackpointer) {
+        maxBackpointer = currentViterbi;
+        backpointer[Pos.END.ordinal()][words.length-1] = s;
+      }
     }
-
-    public String getWord(){
-      return word;
+    // return the list of PoS associated with the words
+    int pointer = backpointer[Pos.END.ordinal()][words.length-1];
+    //res.add(new Pair(words[words.length-1], posValues[pointer]));
+    for(int i = words.length-1; i >= 0; --i){
+      pointer = backpointer[pointer][i];
+      res.add(new Pair(words[i], posValues[pointer]));
     }
-
-    public String getPos(){
-      return pos;
-    }
+    Collections.reverse(res);
+    return res;
   }
   
   public static void main(String[] args){
