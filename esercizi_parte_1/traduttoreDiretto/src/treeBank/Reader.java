@@ -26,6 +26,11 @@ public class Reader {
       String line, word, pos;
       String[] splits;
       Map<String, Integer> tmp;
+      // initialize START key to count total sentences in treebank
+      tmp = new HashMap<>();
+      tmp.put("START", 0);
+      data.put("START", tmp);
+      // parse treebank
       while ((line = br.readLine()) != null) {
         if (!(line.isEmpty() || line.trim().equals("") || line.trim().equals("\n")) && line.charAt(0) != '#') { // ignore comments and empty lines
           splits = line.split("\t"); // splits[1] is token and splits[3] is PoS
@@ -43,6 +48,9 @@ public class Reader {
             tmp.put(pos, 1);
             data.put(word, tmp);
           }
+        }
+        else if(line.contains("# text =")){
+          data.get("START").put("START", data.get("START").get("START") + 1);
         }
       }
     } catch (FileNotFoundException ex) {
@@ -136,8 +144,8 @@ public class Reader {
    * @param args the command line arguments
    */
   public static void main(String[] args) {
-    String path = "/home/confo/UNI/magistrale/TLN/esercizi_parte_1/traduttoreDirect/universal_dependency/ud-treebanks-v2.3/UD_English-GUM/en_gum-ud-dev.conllu";
-    final String TESTWORD = "this", TESTPOS = "DET", PRECPOS = "START";
+    String path = "/home/confo/UNI/magistrale/TLN/esercizi_parte_1/traduttoreDiretto/universal_dependency/ud-treebanks-v2.3/UD_English-GUM/en_gum-ud-dev.conllu";
+    final String TESTWORD = "this", TESTPOS = "X", PRECPOS = "START";
     Map<String, Map<String, Integer>> map = Reader.treeBankToMap(path);
     Map<String, Map<String, Integer>> transitions = Reader.treeBankToTagTransitions(path);
     System.out.println(map);

@@ -26,4 +26,9 @@ public class Pair {
   public Pos getPos() {
     return pos;
   }
+  
+  @Override
+  public String toString(){
+    return "{" + word + ", " + pos.name() + "}";
+  }
 }

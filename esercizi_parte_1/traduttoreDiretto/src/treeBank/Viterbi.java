@@ -24,12 +24,21 @@ public class Viterbi {
     this.transitions = transitions;
   }
   
-  public double posWordProbability(String pos, String word){
-    return Math.log((double) Reader.countWordPos(map, word, pos) / Reader.countPos(map, pos));
+  // TODO: unknown words
+  public double posWordProbability(String word, String pos){
+    double res = Math.log((double) Reader.countWordPos(map, word, pos) / Reader.countPos(map, pos));
+    if (Double.isInfinite(res)){  // discard infinities caused by log
+      res = 0;
+    }
+    return res;
   }
   
   public double posPosProbability(String pos, String precedingPos){
-    return Math.log((double) Reader.countTransition(transitions, precedingPos, pos) / Reader.countPos(map, precedingPos));
+    double res = Math.log((double) Reader.countTransition(transitions, pos, precedingPos) / Reader.countPos(map, precedingPos));
+    if (Double.isInfinite(res)){  // discard infinities caused by log
+      res = 0;
+    }
+    return res;
   }
   
   public List<Pair> viterbi(String text){
@@ -90,8 +99,8 @@ public class Viterbi {
   }
   
   public static void main(String[] args){
-    String path = "/home/confo/UNI/magistrale/TLN/esercizi_parte_1/traduttoreDirect/universal_dependency/ud-treebanks-v2.3/UD_English-GUM/en_gum-ud-dev.conllu";
+    String path = "/home/confo/UNI/magistrale/TLN/esercizi_parte_1/traduttoreDiretto/universal_dependency/ud-treebanks-v2.3/UD_English-GUM/en_gum-ud-dev.conllu";
     Viterbi v = new Viterbi(Reader.treeBankToMap(path), Reader.treeBankToTagTransitions(path));
-    v.viterbi("This is an english sentence.");
+    System.out.println(v.viterbi("This is an english sentence."));
   }
 }
