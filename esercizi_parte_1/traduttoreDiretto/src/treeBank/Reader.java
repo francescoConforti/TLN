@@ -26,10 +26,13 @@ public class Reader {
       String line, word, pos;
       String[] splits;
       Map<String, Integer> tmp;
-      // initialize START key to count total sentences in treebank
+      // initialize START and END keys to count total sentences in treebank
       tmp = new HashMap<>();
       tmp.put("START", 0);
       data.put("START", tmp);
+      tmp = new HashMap<>();
+      tmp.put("END", 0);
+      data.put("END", tmp);
       // parse treebank
       while ((line = br.readLine()) != null) {
         if (!(line.isEmpty() || line.trim().equals("") || line.trim().equals("\n")) && line.charAt(0) != '#') { // ignore comments and empty lines
@@ -49,8 +52,9 @@ public class Reader {
             data.put(word, tmp);
           }
         }
-        else if(line.contains("# text =")){
+        else if(line.trim().equals("")){ // update START and END for new sentence
           data.get("START").put("START", data.get("START").get("START") + 1);
+          data.get("END").put("END", data.get("END").get("END") + 1);
         }
       }
     } catch (FileNotFoundException ex) {
@@ -66,7 +70,13 @@ public class Reader {
     try (BufferedReader br = new BufferedReader(new FileReader(path))) {
       String line, prevPos, pos = "START";
       String[] splits;
-      Map<String, Integer> tmp;
+      Map<String, Integer> tmp = new HashMap<>();
+      // initialize END PoS
+      for(Pos p : Pos.values()){
+        tmp.put(p.name(), 0);
+      }
+      transitions.put("END", tmp);
+      // Parse treebank
       while ((line = br.readLine()) != null) {
         if (!(line.isEmpty() || line.trim().equals("") || line.trim().equals("\n")) && line.charAt(0) != '#') { // ignore comments and empty lines
           splits = line.split("\t"); // splits[3] is PoS
@@ -86,7 +96,9 @@ public class Reader {
               transitions.put(pos, tmp);
             }
           }
-        } else {  // the sentence in the treebank is finished
+        } else if(line.trim().equals("")){  // the sentence in the treebank is finished
+          tmp = transitions.get("END");
+          transitions.get("END").put(pos, tmp.get(pos) + 1);
           pos = prevPos = "START";
         }
       }
@@ -145,7 +157,7 @@ public class Reader {
    */
   public static void main(String[] args) {
     String path = "/home/confo/UNI/magistrale/TLN/esercizi_parte_1/traduttoreDiretto/universal_dependency/ud-treebanks-v2.3/UD_English-GUM/en_gum-ud-dev.conllu";
-    final String TESTWORD = "this", TESTPOS = "X", PRECPOS = "START";
+    final String TESTWORD = ".", TESTPOS = "END", PRECPOS = "PUNCT";
     Map<String, Map<String, Integer>> map = Reader.treeBankToMap(path);
     Map<String, Map<String, Integer>> transitions = Reader.treeBankToTagTransitions(path);
     System.out.println(map);
