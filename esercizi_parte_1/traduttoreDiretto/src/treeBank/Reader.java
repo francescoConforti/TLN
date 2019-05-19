@@ -9,7 +9,9 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -151,6 +153,36 @@ public class Reader {
     }
     return res;
   }
+  
+  public static Map<String, List<Pair>> treeBankToSentences(String path){
+    Map<String, List<Pair>> res = new HashMap<>();
+    try (BufferedReader br = new BufferedReader(new FileReader(path))) {
+      String line;
+      String text = "";
+      while ((line = br.readLine()) != null) {
+        if(!line.trim().equals("")){
+          if(line.charAt(0) == '#'){  // preamble
+            if(line.contains("# text = ")){
+              text = line.replace("# text = ", ""); // only actual text
+            }
+          } else { // do nothing between two sentences
+            List<Pair> list = new ArrayList<>();
+            while(line != null && !line.trim().equals("") && Character.isDigit(line.charAt(0))){ // words
+              String[] splits = line.split("\t"); // splits[1] is token and splits[3] is PoS
+              list.add(new Pair(splits[1], Pos.valueOf(splits[3])));
+              line = br.readLine();
+            }
+            res.put(text, list);
+          }
+        }
+      }
+    } catch (FileNotFoundException ex) {
+      Logger.getLogger(Reader.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (IOException ex) {
+      Logger.getLogger(Reader.class.getName()).log(Level.SEVERE, null, ex);
+    }
+    return res;
+  }
 
   /**
    * @param args the command line arguments
@@ -162,6 +194,7 @@ public class Reader {
     Map<String, Map<String, Integer>> transitions = Reader.treeBankToTagTransitions(path);
     System.out.println(map);
     System.out.println(transitions);
+    System.out.println(Reader.treeBankToSentences(path));
     System.out.println("Values for \"" + TESTWORD + "\": " + map.get(TESTWORD));
     System.out.println("word \"" + TESTWORD + "\" appears " + Reader.countWord(map, TESTWORD) + " times");
     System.out.println("word \"" + TESTWORD + "\" appears with pos " + TESTPOS + " " + Reader.countWordPos(map, TESTWORD, TESTPOS) + " times");

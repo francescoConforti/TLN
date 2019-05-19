@@ -51,9 +51,9 @@ public class Viterbi {
     return res;
   }
 
-  public List<Pair> viterbi(String text) {
+  public List<Pair> viterbi(String text) {  // ?=\\p{Punct})|(?<=\\p{Punct})
     List<Pair> res = new ArrayList<>();
-    String[] words = text.split("(?=\\p{Punct})|(?<=\\p{Punct})|\\W");  // split on whitespace and punctuation, keeping punctuation
+    String[] words = text.split("(?=[.,;:!?])|(?<=[.,;:!?])|\\s");  // split on whitespace and punctuation, keeping punctuation
     double[][] viterbiMatrix = new double[Pos.values().length][words.length]; // Start and End already in Pos (first and last)
     int[][] backpointer = new int[Pos.values().length][words.length];
     double currentViterbi, currentBackpointer, maxBackpointer = 0;
@@ -111,6 +111,6 @@ public class Viterbi {
   public static void main(String[] args) {
     String path = "/home/confo/UNI/magistrale/TLN/esercizi_parte_1/traduttoreDiretto/universal_dependency/ud-treebanks-v2.3/UD_English-GUM/en_gum-ud-dev.conllu";
     Viterbi v = new Viterbi(Reader.treeBankToMap(path), Reader.treeBankToTagTransitions(path));
-    System.out.println(v.viterbi("In his self-appointed role of emperor, Norton issued numerous decrees on matters of the state."));
+    System.out.println(v.viterbi("hello, darkness, my life-old friend!"));
   }
 }
