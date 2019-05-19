@@ -109,8 +109,37 @@ public class Viterbi {
   }
 
   public static void main(String[] args) {
-    String path = "/home/confo/UNI/magistrale/TLN/esercizi_parte_1/traduttoreDiretto/universal_dependency/ud-treebanks-v2.3/UD_English-GUM/en_gum-ud-dev.conllu";
-    Viterbi v = new Viterbi(Reader.treeBankToMap(path), Reader.treeBankToTagTransitions(path));
-    System.out.println(v.viterbi("hello, darkness, my life-old friend!"));
+    String path_train = "/home/confo/UNI/magistrale/TLN/esercizi_parte_1/traduttoreDiretto/universal_dependency/ud-treebanks-v2.3/UD_English-GUM/en_gum-ud-train.conllu";
+    String path_test = "/home/confo/UNI/magistrale/TLN/esercizi_parte_1/traduttoreDiretto/universal_dependency/ud-treebanks-v2.3/UD_English-GUM/en_gum-ud-test.conllu";
+    int equalSentences = 0, equalWords = 0, totalSentences = 0, totalWords = 0;
+    boolean isSentenceEqual;
+    Map<String, List<Pair>> sentences_test = Reader.treeBankToSentences(path_test);
+    Viterbi v = new Viterbi(Reader.treeBankToMap(path_train), Reader.treeBankToTagTransitions(path_train));
+    for(Map.Entry<String, List<Pair>> entry : sentences_test.entrySet()){
+      List<Pair> viterbiResult = v.viterbi(entry.getKey());
+      if(viterbiResult.size() == entry.getValue().size()){
+        isSentenceEqual = true;
+        for(int i = 0; i < viterbiResult.size(); ++i){
+          Pair viterbiPair = viterbiResult.get(i);
+          Pair entryPair = entry.getValue().get(i);
+          if(viterbiPair.getWord().equals(entryPair.getWord()) && viterbiPair.getPos().equals(entryPair.getPos())){ // both words and both PoS are the same
+            ++equalWords;
+            ++totalWords;
+          } else{
+            ++totalWords;
+            isSentenceEqual = false;
+          }
+        }
+        if(isSentenceEqual){
+          ++equalSentences;
+        }
+        ++totalSentences;
+      } else{ // ignore the words since there are not the same amount in both sentences
+        ++totalSentences;
+      }
+    }
+    System.out.println("Performance of Viterbi on test set:");
+    System.out.println("Guessed " + equalSentences + " sentences right out of " + totalSentences);
+    System.out.println("Guessed " + equalWords + " words right out of " + totalWords + " analyzed");
   }
 }
