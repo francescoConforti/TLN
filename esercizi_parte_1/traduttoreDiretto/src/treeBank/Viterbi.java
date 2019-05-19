@@ -33,7 +33,8 @@ public class Viterbi {
         res = 1 / (Pos.values().length - 2);
       }
     } else {
-      res = Math.log((double) Reader.countWordPos(map, word, pos) / Reader.countPos(map, pos));
+      // add 1 to log to exclude negatives
+      res = Math.log(((double) Reader.countWordPos(map, word, pos) / Reader.countPos(map, pos))+1);
       if (Double.isInfinite(res)) {  // discard infinities caused by log
         res = 0;
       }
@@ -42,7 +43,8 @@ public class Viterbi {
   }
 
   public double posPosProbability(String pos, String precedingPos) {
-    double res = Math.log((double) Reader.countTransition(transitions, pos, precedingPos) / Reader.countPos(map, precedingPos));
+    // add 1 to log to exclude negatives
+    double res = Math.log(((double) Reader.countTransition(transitions, pos, precedingPos) / Reader.countPos(map, precedingPos))+1);
     if (Double.isInfinite(res)) {  // discard infinities caused by log
       res = 0;
     }
@@ -73,7 +75,7 @@ public class Viterbi {
           if (currentViterbi > viterbiMatrix[s][t]) {
             viterbiMatrix[s][t] = currentViterbi;
           }
-          currentBackpointer = viterbiMatrix[sprec][t - 1] * a; // TODO: fix negative numbers
+          currentBackpointer = viterbiMatrix[sprec][t - 1] * a;
           if (currentBackpointer > maxBackpointer) {
             maxBackpointer = currentBackpointer;
             backpointer[s][t] = sprec;
@@ -99,8 +101,8 @@ public class Viterbi {
     int pointer = backpointer[Pos.END.ordinal()][words.length - 1];
     //res.add(new Pair(words[words.length-1], posValues[pointer]));
     for (int i = words.length - 1; i >= 0; --i) {
-      pointer = backpointer[pointer][i];
       res.add(new Pair(words[i], posValues[pointer]));
+      pointer = backpointer[pointer][i];
     }
     Collections.reverse(res);
     return res;
@@ -109,6 +111,6 @@ public class Viterbi {
   public static void main(String[] args) {
     String path = "/home/confo/UNI/magistrale/TLN/esercizi_parte_1/traduttoreDiretto/universal_dependency/ud-treebanks-v2.3/UD_English-GUM/en_gum-ud-dev.conllu";
     Viterbi v = new Viterbi(Reader.treeBankToMap(path), Reader.treeBankToTagTransitions(path));
-    System.out.println(v.viterbi("This is an Italian idea."));
+    System.out.println(v.viterbi("In his self-appointed role of emperor, Norton issued numerous decrees on matters of the state."));
   }
 }

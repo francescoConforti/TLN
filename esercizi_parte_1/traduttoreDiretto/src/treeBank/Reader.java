@@ -157,7 +157,7 @@ public class Reader {
    */
   public static void main(String[] args) {
     String path = "/home/confo/UNI/magistrale/TLN/esercizi_parte_1/traduttoreDiretto/universal_dependency/ud-treebanks-v2.3/UD_English-GUM/en_gum-ud-dev.conllu";
-    final String TESTWORD = ".", TESTPOS = "END", PRECPOS = "PUNCT";
+    final String TESTWORD = "declare", TESTPOS = "PROPN", PRECPOS = "PUNCT";
     Map<String, Map<String, Integer>> map = Reader.treeBankToMap(path);
     Map<String, Map<String, Integer>> transitions = Reader.treeBankToTagTransitions(path);
     System.out.println(map);
