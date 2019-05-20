@@ -141,71 +141,37 @@ public class Utils {
     return dist;
   }
   
-//  public int descendantDistance(ISynsetID ancestor, ISynsetID descendant){
-//    if(ancestor.equals(descendant)){
-//      return 0;
-//    }
-//    int distance = 1000;
-//    List<ISynsetID> hyponyms
-//            = dict.getSynset(ancestor).getRelatedSynsets(Pointer.HYPONYM);
-//    for(ISynsetID hypo : hyponyms){
-//      if(hypo.equals(descendant)){
-//        return 1;
-//      }
-//      distance = Math.min(distance, descendantDistanceAux(hypo, descendant));
-//    }
-//    return distance;
-//  }
-//  
-//  private int descendantDistanceAux(ISynsetID ancestor, ISynsetID descendant){
-//    int distance = 1000;
-//    List<ISynsetID> hyponyms
-//            = dict.getSynset(ancestor).getRelatedSynsets(Pointer.HYPONYM);
-//    for(ISynsetID hypo : hyponyms){
-//      if(hypo.equals(descendant)){
-//        return 1;
-//      }
-//      distance = Math.min(distance, descendantDistanceAux(hypo, descendant));
-//    }
-//    return distance + 1;
-//}
-
-  /**
-   *  This implementation uses iterative deepening
-   * @param ancestor
-   * @param descendant
-   * @return
-   */
-  
   public int descendantDistance(ISynsetID ancestor, ISynsetID descendant){
-    int depth = 0;
+    
+    class Pair{
+      ISynsetID synset;
+      int distance;
+      
+      public Pair(ISynsetID synset, int distance){
+        this.synset = synset;
+        this.distance = distance;
+      }
+    }
+
+    int distance = 0;
     boolean found = false;
-    while(!found && depth <= 19){
-      if(descendantDistanceAux(ancestor, descendant, depth)){
+    Pair p;
+    Queue<Pair> q = new LinkedList<>();
+    List<ISynsetID> hypernyms;
+    q.add(new Pair(descendant, 0));
+    while(!found && !q.isEmpty()){
+      p = q.poll();
+      if(p != null && ancestor.equals(p.synset)){
         found = true;
-      }
-      else{
-        ++depth;
-      }
-    }
-    return depth;
-  }
-  
-  private boolean descendantDistanceAux(ISynsetID ancestor, ISynsetID descendant, int maxDepth){
-    boolean found = false;
-    if(maxDepth == 0){
-      if(ancestor.equals(descendant)){
-        found = true;
+        distance = p.distance;
+      } else{
+        hypernyms = dict.getSynset(p.synset).getRelatedSynsets(Pointer.HYPERNYM);
+        for(ISynsetID s : hypernyms){
+          q.add(new Pair(s, p.distance +1));
+        }
       }
     }
-    else{
-      List<ISynsetID> hyponyms
-            = dict.getSynset(ancestor).getRelatedSynsets(Pointer.HYPONYM);
-      for(ISynsetID hypo : hyponyms){
-        found = found || descendantDistanceAux(hypo, descendant, maxDepth -1);
-      }
-    }
-    return found;
+    return distance;
   }
   
   /**
