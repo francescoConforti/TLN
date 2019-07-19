@@ -60,10 +60,9 @@ public class Viterbi {
     return res;
   }
 
-  public List<Pair> viterbi(String text) {
-    int[] posCount = new int[Pos.values().length];
+  public List<Pair> viterbi(String text, int[] posCount) {
     List<Pair> res = new ArrayList<>();
-    String[] words = text.replaceAll("\\s+(?=[!\"#$%&'()*+,./:;<=>?@\\^_{|}~`\\[\\]“”])", "").split("\\s+|(?=[!\"#$%&'()*+,./:;<=>?@\\^_{|}~`\\[\\]“”])|(?<=[!\"#$%&'()*+,./:;<=>?@\\^_{|}~`\\[\\]“”])");  //split on whitespace and punctuation, keeping punctuation
+    String[] words = text.replaceAll("\\s+(?=[!\"#$%&()*+,./:;<=>?@\\^_{|}~`\\[\\]“”])", "").split("\\s+|(?=[!\"#$%&'()*+,./:;<=>?@\\^_{|}~`\\[\\]“”])|(?<=[!\"#$%&()*+,./:;<=>?@\\^_{|}~`\\[\\]“”])");  //split on whitespace and punctuation, keeping punctuation
     double[][] viterbiMatrix = new double[Pos.values().length][words.length]; // Start and End already in Pos (first and last)
     int[][] backpointer = new int[Pos.values().length][words.length];
     double currentViterbi, currentBackpointer, maxBackpointer = 0;
@@ -133,7 +132,7 @@ public class Viterbi {
       posCount[i] = Reader.countPos(Reader.treeBankToMap(path_train), Pos.values()[i].name());
     }
     for(Map.Entry<String, List<Pair>> entry : sentences_test.entrySet()){
-      viterbiResult = v.viterbi(entry.getKey());
+      viterbiResult = v.viterbi(entry.getKey(), posCount);
       if(viterbiResult.size() == entry.getValue().size()){
         isSentenceEqual = true;
         for(int i = 0; i < viterbiResult.size(); ++i){
