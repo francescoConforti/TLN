@@ -60,7 +60,8 @@ public class Viterbi {
     return res;
   }
 
-  public List<Pair> viterbi(String text, int[] posCount) {  // ?=\\p{Punct})|(?<=\\p{Punct})
+  public List<Pair> viterbi(String text) {
+    int[] posCount = new int[Pos.values().length];
     List<Pair> res = new ArrayList<>();
     String[] words = text.replaceAll("\\s+(?=[!\"#$%&'()*+,./:;<=>?@\\^_{|}~`\\[\\]“”])", "").split("\\s+|(?=[!\"#$%&'()*+,./:;<=>?@\\^_{|}~`\\[\\]“”])|(?<=[!\"#$%&'()*+,./:;<=>?@\\^_{|}~`\\[\\]“”])");  //split on whitespace and punctuation, keeping punctuation
     double[][] viterbiMatrix = new double[Pos.values().length][words.length]; // Start and End already in Pos (first and last)
@@ -121,7 +122,7 @@ public class Viterbi {
     String path_train = "/home/confo/UNI/magistrale/TLN/esercizi_parte_1/traduttoreDiretto/universal_dependency/ud-treebanks-v2.3/UD_English-GUM/en_gum-ud-train.conllu";
     String path_test = "/home/confo/UNI/magistrale/TLN/esercizi_parte_1/traduttoreDiretto/universal_dependency/ud-treebanks-v2.3/UD_English-GUM/en_gum-ud-test.conllu";
     boolean isSentenceEqual;
-    Map<String, List<Pair>> sentences_test = Reader.treeBankToSentences(path_test); // TODO: rimettere test invece di train (DEBUG)
+    Map<String, List<Pair>> sentences_test = Reader.treeBankToSentences(path_test);
     Viterbi v = new Viterbi(Reader.treeBankToMap(path_train), Reader.treeBankToTagTransitions(path_train));
     List<Pair> viterbiResult;
     Pair viterbiPair = null;
@@ -132,7 +133,7 @@ public class Viterbi {
       posCount[i] = Reader.countPos(Reader.treeBankToMap(path_train), Pos.values()[i].name());
     }
     for(Map.Entry<String, List<Pair>> entry : sentences_test.entrySet()){
-      viterbiResult = v.viterbi(entry.getKey(), posCount);
+      viterbiResult = v.viterbi(entry.getKey());
       if(viterbiResult.size() == entry.getValue().size()){
         isSentenceEqual = true;
         for(int i = 0; i < viterbiResult.size(); ++i){
