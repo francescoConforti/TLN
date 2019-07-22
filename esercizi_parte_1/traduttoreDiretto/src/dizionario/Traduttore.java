@@ -73,11 +73,11 @@ public class Traduttore {
     }
     // Direct translation
     for(Pair p : viterbi){
-      if(p.getPos().equals(Pos.PUNCT)){
-        output = output + p.getWord() + " ";
-      }
-      else if(translations.get(p.getWord()) != null){
+      if(translations.get(p.getWord()) != null){
         output = output + translate(p.getWord()) + " ";
+      }
+      else if(p.getPos().equals(Pos.PUNCT)){
+        output = output + p.getWord() + " ";
       }
       else{
         output = output + p.getWord() + " ";
