@@ -4,13 +4,10 @@
  * and open the template in the editor.
  */
 package conceptSimilarity;
-
-// Java Program to find 
-
 import java.util.Arrays;
 
+// Java Program to find 
 // covariance of two set.
-
 public class Statistics { 
 
 // Function to find mean. 
