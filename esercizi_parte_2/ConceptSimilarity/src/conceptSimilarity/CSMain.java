@@ -40,6 +40,7 @@ public class CSMain {
     double[] wpArr, spArr, lcArr;
     double wpMaxVal, spMaxVal, lcMaxVal;
     double wpVal, spVal, lcVal;
+    int totalValues;
     
     // create and open dictionary
     URL url = null;
@@ -77,6 +78,7 @@ public class CSMain {
     } catch (IOException ex) {
       Logger.getLogger(CSMain.class.getName()).log(Level.SEVERE, null, ex);
     }
+    totalValues = values.size();
     
     for (int i = 0; i < words1.size(); ++i) { // for every row
       List<IWordID> wordID1 = null;
@@ -124,6 +126,7 @@ public class CSMain {
         spResults.add(spMaxVal);
         lcResults.add(lcMaxVal);
       }
+      System.out.println(i+1 + "\\" + totalValues);  // Print row number (for speed evaluation)
     }
     // Transform collections into arrays
     valuesArr = new double[values.size()];

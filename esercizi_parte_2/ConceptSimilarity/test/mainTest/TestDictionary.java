@@ -12,6 +12,7 @@ import edu.mit.jwi.item.IWord;
 import edu.mit.jwi.item.IWordID;
 import edu.mit.jwi.item.POS;
 import edu.mit.jwi.item.Pointer;
+import edu.mit.jwi.item.Synset;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -20,7 +21,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static javafx.scene.input.KeyCode.I;
 
 public class TestDictionary {
 
@@ -39,6 +39,10 @@ public class TestDictionary {
     System.out.println(" Id = " + wordID);
     System.out.println(" Lemma = " + word.getLemma());
     System.out.println(" Gloss = " + word.getSynset().getGloss());
+    for(ISynsetID s : word.getSynset().getRelatedSynsets(Pointer.ALSO_SEE)){
+      ISynset syn = dict.getSynset(s);
+      System.out.println(" Words = " + syn);
+    }
   }
 
   public void testRAMDictionary(File wnDir) throws Exception {
@@ -97,7 +101,7 @@ public class TestDictionary {
     IWord word = dict.getWord(wordID);
     ISynset synset = word.getSynset();
 // get the hypernyms
-    List< ISynsetID> hypernyms
+    List<ISynsetID> hypernyms
             = synset.getRelatedSynsets(Pointer.HYPERNYM);
 // print out each h y p e r n y m s id and synonyms
     List< IWord> words;
@@ -120,12 +124,12 @@ public class TestDictionary {
    */
   public static void main(String[] args) {
     TestDictionary test = new TestDictionary();
-    /*try {
+    try {
       test.testDictionary();
     } catch (IOException ex) {
       Logger.getLogger(TestDictionary.class.getName()).log(Level.SEVERE, null, ex);
     }
-    
+    /*
     File file = new File("/home/confo/UNI/magistrale/TLN/esercizi_parte_2/ConceptSimilarity/altro/dict");
     try {
       test.testRAMDictionary(file);

@@ -92,7 +92,7 @@ public class Traduttore {
   
   public static void main(String[] args){
     String path_train = "/home/confo/UNI/magistrale/TLN/esercizi_parte_1/traduttoreDiretto/universal_dependency/ud-treebanks-v2.3/UD_English-GUM/en_gum-ud-train.conllu";
-    String input = "Your friends may escape, but you are doomed";
+    String input = "The black droid then lowers Vader's mask and helmet onto his head.";
     input = input.toLowerCase();
     Traduttore t = new Traduttore();
     Viterbi v = new Viterbi(Reader.treeBankToMap(path_train), Reader.treeBankToTagTransitions(path_train));

@@ -127,11 +127,11 @@ public class TestUtils {
     }
     
     // get synset for a word
-    IIndexWord idxWord = dict.getIndexWord("love", POS.NOUN);
+    IIndexWord idxWord = dict.getIndexWord("entity", POS.NOUN);
     IWordID wordID = idxWord.getWordIDs().get(0); // 1 st meaning
     ISynsetID synset1 = wordID.getSynsetID();
     // get synset for another word
-    idxWord = dict.getIndexWord("love", POS.NOUN);
+    idxWord = dict.getIndexWord("dog", POS.NOUN);
     wordID = idxWord.getWordIDs().get(0); // 1 st meaning
     ISynsetID synset2 = wordID.getSynsetID();
     

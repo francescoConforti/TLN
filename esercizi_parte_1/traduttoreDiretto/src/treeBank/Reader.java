@@ -189,12 +189,12 @@ public class Reader {
    */
   public static void main(String[] args) {
     String path = "/home/confo/UNI/magistrale/TLN/esercizi_parte_1/traduttoreDiretto/universal_dependency/ud-treebanks-v2.3/UD_English-GUM/en_gum-ud-train.conllu";
-    final String TESTWORD = "declare", TESTPOS = "PROPN", PRECPOS = "PUNCT";
+    final String TESTWORD = "towers", TESTPOS = "NOUN", PRECPOS = "DET";
     Map<String, Map<String, Integer>> map = Reader.treeBankToMap(path);
     Map<String, Map<String, Integer>> transitions = Reader.treeBankToTagTransitions(path);
-    System.out.println(map);
-    System.out.println(transitions);
-    System.out.println(Reader.treeBankToSentences(path));
+    //System.out.println(map);
+    //System.out.println(transitions);
+    //System.out.println(Reader.treeBankToSentences(path));
     System.out.println("Values for \"" + TESTWORD + "\": " + map.get(TESTWORD));
     System.out.println("word \"" + TESTWORD + "\" appears " + Reader.countWord(map, TESTWORD) + " times");
     System.out.println("word \"" + TESTWORD + "\" appears with pos " + TESTPOS + " " + Reader.countWordPos(map, TESTWORD, TESTPOS) + " times");

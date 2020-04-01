@@ -18,7 +18,9 @@ public class Viterbi {
 
   private final Map<String, Map<String, Integer>> map;
   private final Map<String, Map<String, Integer>> transitions;
-  private final double smoothingFactor = 0.00000001;
+  private final double NEWWORD = 0.00001;
+  private final double NEWPOS = 0.00001;
+  private final double NEWTRANS = 0.00001;
 
   public Viterbi(Map<String, Map<String, Integer>> corpus, Map<String, Map<String, Integer>> transitions) {
     map = corpus;
@@ -29,15 +31,15 @@ public class Viterbi {
     double res;
     if (Reader.countWord(map, word) <= 0) { // manage unknown words
       if (pos.equals(Pos.PROPN)) {
-        res = smoothingFactor;
+        res = NEWWORD;
       } else {
-        res = smoothingFactor / (Pos.values().length - 2);
+        res = NEWWORD / (Pos.values().length - 2);
       }
     } else {
       // add 1 to log to exclude negatives
       double wordPos = Reader.countWordPos(map, word, pos.name());
       if(wordPos <= 0){
-        wordPos = smoothingFactor;
+        wordPos = NEWPOS;
       }
       res = Math.log((wordPos / posCount[pos.ordinal()])+1);
       if (Double.isInfinite(res)) {  // discard infinities caused by log
@@ -51,7 +53,7 @@ public class Viterbi {
     // add 1 to log to exclude negatives
     double transitionCount = Reader.countTransition(transitions, pos.name(), precedingPos.name());
     if(transitionCount <= 0){
-      transitionCount = smoothingFactor;
+      transitionCount = NEWTRANS;
     }
     double res = Math.log((transitionCount / posCount[precedingPos.ordinal()])+1);
     if (Double.isInfinite(res)) {  // discard infinities caused by log
@@ -118,8 +120,8 @@ public class Viterbi {
   }
 
   public static void main(String[] args) {
-    String path_train = "/home/confo/UNI/magistrale/TLN/esercizi_parte_1/traduttoreDiretto/universal_dependency/ud-treebanks-v2.3/UD_English-GUM/en_gum-ud-train.conllu";
-    String path_test = "/home/confo/UNI/magistrale/TLN/esercizi_parte_1/traduttoreDiretto/universal_dependency/ud-treebanks-v2.3/UD_English-GUM/en_gum-ud-test.conllu";
+    String path_train = "/home/confo/UNI/magistrale/TLN/esercizi_parte_1/traduttoreDiretto/universal_dependency/ud-treebanks-v2.3/UD_English-LinES/en_lines-ud-train.conllu";
+    String path_test = "/home/confo/UNI/magistrale/TLN/esercizi_parte_1/traduttoreDiretto/universal_dependency/ud-treebanks-v2.3/UD_English-LinES/en_lines-ud-test.conllu";
     boolean isSentenceEqual;
     Map<String, List<Pair>> sentences_test = Reader.treeBankToSentences(path_test);
     Viterbi v = new Viterbi(Reader.treeBankToMap(path_train), Reader.treeBankToTagTransitions(path_train));
