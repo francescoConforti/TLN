@@ -1,6 +1,9 @@
-from nltk.corpus import wordnet
+import nltk
+from nltk.corpus import wordnet, semcor
+from nltk import tree
 import string
 import re
+import random
 
 # signature should already be a set
 def computeOverlap(signature, context):
@@ -28,10 +31,13 @@ def simplifiedLesk(word, sentence):
     if overlap > maxOverlap:
       maxOverlap = overlap
       bestSense = sense
-  #print("overlap: " + str(maxOverlap))
   return bestSense
 
-# sentences.txt
+# index = 0
+# print(semcor.sents()[index])
+# s = [[str(c) for c in s] for s in semcor.tagged_sents(tag='sem')[index]]
+
+# # sentences.txt
 myFile = open("./sentences.txt")
 for sentence in myFile:
   if sentence[0] == "-":
@@ -43,5 +49,28 @@ for sentence in myFile:
     for l in sense.lemmas():
       print(l.name(), end="/")
     print(" " + sentenceHalves[1] + "\t" + str(sense))
-
 myFile.close()
+# # semcor
+totalSentences = 50
+indeces = random.sample(range(0, 600), totalSentences)
+guessedSenses = 0
+for i in indeces:
+  sentence = semcor.sents()[i]
+  sent_sem = semcor.tagged_sents(tag="sem")[i]
+  lemmas = [word.label() for word in sent_sem if isinstance(word, tree.Tree)]  # annotated WordNet lemmas (= synset.hw)
+  lemmas = [
+      l for l in lemmas if isinstance(l, nltk.corpus.reader.wordnet.Lemma)
+  ]  # skip entries where sense isn't a Lemma object
+  indeces = list(range(len(sentence)-1))
+  random.shuffle(indeces)
+  for r in indeces:
+    word = sentence[r].strip()
+    if word.isalpha() and len(word) > 3 and len(wordnet.synsets(word)) > 0: # naive check to avoid punctuation and most function words (articles, auxiliaries, etc)
+      break
+  word = word.lower()
+  sense = simplifiedLesk(word, " ".join(sentence))
+  for s in sense.lemmas():
+    if s in lemmas:
+      guessedSenses += 1
+accuracy = guessedSenses / totalSentences
+print("acc: " + str(accuracy) + " guessed: " + str(guessedSenses))
