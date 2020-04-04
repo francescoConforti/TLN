@@ -33,12 +33,10 @@ def simplifiedLesk(word, sentence):
       bestSense = sense
   return bestSense
 
-# index = 0
-# print(semcor.sents()[index])
-# s = [[str(c) for c in s] for s in semcor.tagged_sents(tag='sem')[index]]
-
-# # sentences.txt
+# sentences.txt
+outputFile = open("results.txt", "w")
 myFile = open("./sentences.txt")
+outputFile.write("sentences.txt\n\n")
 for sentence in myFile:
   if sentence[0] == "-":
     targetWord = re.search('\\*\\*(.+?)\\*\\*', sentence).group(1)
@@ -46,11 +44,15 @@ for sentence in myFile:
     sense = simplifiedLesk(targetWord, sentence)
     sentenceHalves = sentence.split("**"+targetWord+"**")
     print(sentenceHalves[0], end= " ")
+    outputFile.write(sentenceHalves[0] + " ")
     for l in sense.lemmas():
       print(l.name(), end="/")
+      outputFile.write(l.name() + "/")
     print(" " + sentenceHalves[1] + "\t" + str(sense))
+    outputFile.write(" " + sentenceHalves[1] + "\t" + str(sense) + "\n")
 myFile.close()
-# # semcor
+# semcor
+outputFile.write("\nsemcor\n\n")
 totalSentences = 50
 indeces = random.sample(range(0, 600), totalSentences)
 guessedSenses = 0
@@ -69,8 +71,13 @@ for i in indeces:
       break
   word = word.lower()
   sense = simplifiedLesk(word, " ".join(sentence))
+  outputFile.write(" ".join(sentence) + "\nword: " + word + "\tsense: " + str(sense))
   for s in sense.lemmas():
     if s in lemmas:
       guessedSenses += 1
+      outputFile.write("\tOK")
+  outputFile.write("\n")
 accuracy = guessedSenses / totalSentences
 print("acc: " + str(accuracy) + " guessed: " + str(guessedSenses))
+outputFile.write("\nacc: " + str(accuracy) + " guessed: " + str(guessedSenses))
+outputFile.close()
