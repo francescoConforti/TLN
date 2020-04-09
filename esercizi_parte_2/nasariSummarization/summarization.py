@@ -1,5 +1,6 @@
 import argparse
 import nltk.corpus
+import string
 
 class nasariObj:
   babel = ""
@@ -40,7 +41,7 @@ def readText(path):
 
 def removeStopwords(words):
   stopwords = nltk.corpus.stopwords.words("english")
-  return [w for w in words if not w.replace(".", "") in stopwords]
+  return [w.translate(str.maketrans('','',string.punctuation)).lower() for w in words if not w.translate(str.maketrans('','',string.punctuation)) in stopwords]
 
 # v1, v2 are lists of (synset, score)
 def weightedOverlap(v1, v2):
@@ -83,6 +84,9 @@ def main():
     exit(-1)
   nasari = readNasari()
   textLines = readText(args.path)
+  titleWords = removeStopwords(textLines[0].strip().split())
+  context = [obj for obj in nasari if obj.wiki in titleWords or obj.wiki + "s" in titleWords]
+  splittedLines = [removeStopwords(sentence.strip().split()) for sentence in textLines[1:]]
 
 if __name__ == "__main__":
    main()
