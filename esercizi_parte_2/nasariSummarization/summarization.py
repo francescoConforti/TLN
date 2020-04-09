@@ -1,4 +1,5 @@
 import argparse
+import nltk.corpus
 
 class nasariObj:
   babel = ""
@@ -15,6 +16,8 @@ class nasariObj:
     print("wiki: " + self.wiki)
     print("wordnet: " + str(self.wn))
     print("")
+
+nasari = []
 
 def readNasari():
   nasariData = []
@@ -33,9 +36,44 @@ def readNasari():
 def readText(path):
   with open(path) as f:
     lines = f.readlines()
-  return [l.strip() for l in lines if not l.strip() == "" and not l[0] == "#"] 
+  return [l.strip() for l in lines if not l.strip() == "" and not l[0] == "#"]
+
+def removeStopwords(words):
+  stopwords = nltk.corpus.stopwords.words("english")
+  return [w for w in words if not w.replace(".", "") in stopwords]
+
+# v1, v2 are lists of (synset, score)
+def weightedOverlap(v1, v2):
+  intersection = []
+  for sense1, score1 in v1:
+    for sense2, score2 in v2:
+      if sense1 == sense2:
+        intersection.append((sense1, score1, score2))
+  res = 0
+  if len(intersection) == 0:
+    res = 0.01
+  else:
+    num = 0
+    den = 0
+    for i, _sense, score1, score2 in enumerate(intersection):
+      num += (score1 + score2)**(-1)
+      den += (2*i)**(-1)
+    res = num / den
+  return res
+
+def similarity(word1, word2):
+  synsets1 = [(obj.babel, obj.wn) for obj in nasari if obj.wiki == word1]
+  synsets2 = [(obj.babel, obj.wn) for obj in nasari if obj.wiki == word2]
+  maxOverlap = 0
+  for _b1, s1 in synsets1:
+    for _b2, s2 in synsets2:
+      overlap = weightedOverlap(s1, s2)
+      if overlap > maxOverlap:
+        maxOverlap = overlap
+  return maxOverlap
 
 def main():
+  global nasari
   parser = argparse.ArgumentParser()
   parser.add_argument("compression", help="compression rate in [0-100]%", type=int)
   parser.add_argument("path", help="path to file to summarize")
@@ -44,10 +82,7 @@ def main():
     print("invalid compression value")
     exit(-1)
   nasari = readNasari()
-  lines = readText(args.path)
-  print(lines)
-  
-
+  textLines = readText(args.path)
 
 if __name__ == "__main__":
    main()
