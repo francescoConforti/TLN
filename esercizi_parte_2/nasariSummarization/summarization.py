@@ -1,6 +1,7 @@
 import argparse
 import nltk.corpus
 import string
+from operator import itemgetter
 
 class nasariObj:
   babel = ""
@@ -56,9 +57,9 @@ def weightedOverlap(v1, v2):
   else:
     num = 0
     den = 0
-    for i, _sense, score1, score2 in enumerate(intersection):
-      num += (score1 + score2)**(-1)
-      den += (2*i)**(-1)
+    for i, (_sense, score1, score2) in enumerate(intersection):
+      num += (float(score1) + float(score2))**(-1)
+      den += (2*(i+1))**(-1)
     res = num / den
   return res
 
@@ -73,6 +74,30 @@ def similarity(word1, word2):
         maxOverlap = overlap
   return maxOverlap
 
+# returns a list of tuples (sentenceNumber, score)
+def getScores(context, sentences):
+  splittedSentences = [removeStopwords(sentence.strip().split()) for sentence in sentences]
+  scores = []
+  # compute the total score for each sentence, normalized by length
+  for sentenceNumber, line in enumerate(splittedSentences):
+    score = 0
+    # for each word in the sentence compute the best similarity with the objects in the context
+    for word in line:
+      maxSimilarity = 0
+      similarityScore = 0
+      for c in context:
+        similarityScore = similarity(c, word)
+        if similarityScore > maxSimilarity:
+          maxSimilarity = similarityScore
+      score += maxSimilarity
+    scores.append((sentenceNumber, score / len(line)))
+  return scores
+
+def summarize(sentences, scores, numDeletions):
+  scores.sort(key=itemgetter(1))
+  toDelete = [index for index, _score in scores[:numDeletions]]
+  return [s for i, s in enumerate(sentences) if i not in toDelete]
+
 def main():
   global nasari
   parser = argparse.ArgumentParser()
@@ -85,8 +110,18 @@ def main():
   nasari = readNasari()
   textLines = readText(args.path)
   titleWords = removeStopwords(textLines[0].strip().split())
-  context = [obj for obj in nasari if obj.wiki in titleWords or obj.wiki + "s" in titleWords]
-  splittedLines = [removeStopwords(sentence.strip().split()) for sentence in textLines[1:]]
+  context = list(set([obj.wiki for obj in nasari if obj.wiki in titleWords or obj.wiki + "s" in titleWords]))
+  numDeletions = int(len(textLines) * (args.compression / 100))
+  scores = getScores(context, textLines)
+  print("scores: ")
+  print(scores)
+  abridged = summarize(textLines, scores, numDeletions)
+  print("\nresult:")
+  print(abridged)
+  f = open("abridged" + "_".join(textLines[0].split()) + ".txt", "w")
+  for line in abridged:
+    f.write(line + "\n\n")
+  f.close()
 
 if __name__ == "__main__":
    main()
