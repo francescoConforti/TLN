@@ -106,7 +106,16 @@ public class SenseIdentification {
     Map<String, List<Float>> n1 = nasari.get(term1);
     Map<String, List<Float>> n2 = nasari.get(term2);
     double similarity = 0, maxSimilarity = 0;
-    
+    for(Map.Entry<String, List<Float>> entry1 : n1.entrySet()){
+      for(Map.Entry<String, List<Float>> entry2 : n2.entrySet()){
+        similarity = Math.abs(cosineSimilarity(entry1.getValue(), entry2.getValue()));
+        if(similarity > maxSimilarity){
+          maxSimilarity = similarity;
+          res[0] = entry1.getKey();
+          res[1] = entry2.getKey();
+        }
+      }
+    }
     return res;
   }
   
@@ -117,38 +126,23 @@ public class SenseIdentification {
    * @return cosine similarity for the two vectors
    */
   private double cosineSimilarity(List<Float> v1, List<Float> v2){
-    double res = 0;
-    return res;
+    double num = 0, sum1 = 0, sum2 = 0;
+    // suppose both lists have the same lenght (300)
+    for(int i = 0; i < v1.size(); ++i){
+      float f1 = v1.get(i);
+      float f2 = v2.get(i);
+      num += f1 * f2;
+      sum1 += Math.pow(f1, 2);
+      sum2 += Math.pow(f2, 2);
+    }
+    return num / (Math.sqrt(sum1) * Math.sqrt(sum2));
   }
 
   /**
    * @param args the command line arguments
    */
   public static void main(String[] args) {
-    SenseIdentification si = new SenseIdentification();
-    Map<String, List<String>> semeval = si.getSemEval();
-    Map<String, Map<String, List<Float>>> nasari = si.getNasari();
-    /*System.out.println("SEMEVAL:\n\n");
-    for (Map.Entry<String, List<String>> entry : semeval.entrySet()) {
-      String key = entry.getKey();
-      List<String> value = entry.getValue();
-      System.out.print(key + ": ");
-      for(String s : value){
-        System.out.print(s + ", ");
-      }
-      System.out.println("");
-    }
-    System.out.println("\n\nNASARI:\n\n");
-    for (Map.Entry<String, Map<String, List<Float>>> entry : nasari.entrySet()) {
-      System.out.print(entry.getKey() + "\t");
-      for(Map.Entry<String, List<Float>> e : entry.getValue().entrySet()){
-        System.out.println(e.getKey() + "\t");
-        for(Float f : e.getValue()){
-          System.out.print(f + ", ");
-        }
-      }
-      System.out.println("");
-    }*/
+    
   }
   
 }
