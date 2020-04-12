@@ -19,8 +19,27 @@ import java.util.Scanner;
  */
 public class SenseIdentification {
   
-  // returns a Map<term, List<synset>>
-  public Map<String, List<String>> readSemEval(){
+  private final Map<String, List<String>> semEval;
+  private final Map<String, Map<String, List<Float>>> nasari;
+  
+  public SenseIdentification(){
+    semEval = readSemEval();
+    nasari = readNasari();
+  }
+  
+  public Map<String, List<String>> getSemEval() {
+    return semEval;
+  }
+
+  public Map<String, Map<String, List<Float>>> getNasari() {
+    return nasari;
+  }
+  
+  /**
+   * 
+   * @return a Map<term, List<synset>>
+   */
+  private Map<String, List<String>> readSemEval(){
     Map<String, List<String>> res = new HashMap<>();
     String lastTerm = "";
     try {
@@ -43,15 +62,18 @@ public class SenseIdentification {
     return res;
   }
   
-  // returns a Map<term, map<synset, List<vector dimensions>>>
-  public Map<String, Map<String, List<Float>>> readNasari(){
+  /**
+   * 
+   * @return Map<term, map<synset, List<vector dimensions>>>
+   */
+  private Map<String, Map<String, List<Float>>> readNasari(){
     Map<String, Map<String, List<Float>>> res = new HashMap<>();
     try {
       File f = new File("data/mini_NASARI.tsv");
       Scanner scanner = new Scanner(f);
       while (scanner.hasNextLine()) {
         String line = scanner.nextLine();
-        String[] data = line.trim().split(" ");
+        String[] data = line.trim().split("\t");
         String synset = data[0].split("__")[0];
         String term = data[0].split("__")[1];
         List<Float> vector = new ArrayList<>();
@@ -72,15 +94,41 @@ public class SenseIdentification {
     }
     return res;
   }
+  
+  /**
+   * 
+   * @param term1
+   * @param term2
+   * @return an array of two strings, where each item is a synset
+   */
+  public String[] similarity(String term1, String term2){
+    String[] res = new String[2];
+    Map<String, List<Float>> n1 = nasari.get(term1);
+    Map<String, List<Float>> n2 = nasari.get(term2);
+    double similarity = 0, maxSimilarity = 0;
+    
+    return res;
+  }
+  
+  /**
+   * 
+   * @param v1
+   * @param v2
+   * @return cosine similarity for the two vectors
+   */
+  private double cosineSimilarity(List<Float> v1, List<Float> v2){
+    double res = 0;
+    return res;
+  }
 
   /**
    * @param args the command line arguments
    */
   public static void main(String[] args) {
     SenseIdentification si = new SenseIdentification();
-    Map<String, List<String>> semeval = si.readSemEval();
-    Map<String, Map<String, List<Float>>> nasari = si.readNasari();
-    System.out.println("semeval:\n\n");
+    Map<String, List<String>> semeval = si.getSemEval();
+    Map<String, Map<String, List<Float>>> nasari = si.getNasari();
+    /*System.out.println("SEMEVAL:\n\n");
     for (Map.Entry<String, List<String>> entry : semeval.entrySet()) {
       String key = entry.getKey();
       List<String> value = entry.getValue();
@@ -90,6 +138,17 @@ public class SenseIdentification {
       }
       System.out.println("");
     }
+    System.out.println("\n\nNASARI:\n\n");
+    for (Map.Entry<String, Map<String, List<Float>>> entry : nasari.entrySet()) {
+      System.out.print(entry.getKey() + "\t");
+      for(Map.Entry<String, List<Float>> e : entry.getValue().entrySet()){
+        System.out.println(e.getKey() + "\t");
+        for(Float f : e.getValue()){
+          System.out.print(f + ", ");
+        }
+      }
+      System.out.println("");
+    }*/
   }
   
 }
