@@ -8,7 +8,9 @@ package senseidentification;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -75,7 +77,7 @@ public class SenseIdentification {
         String line = scanner.nextLine();
         String[] data = line.trim().split("\t");
         String synset = data[0].split("__")[0];
-        String term = data[0].split("__")[1];
+        String term = data[0].split("__")[1].replace("_", " ");
         List<Float> vector = new ArrayList<>();
         for(int i = 1; i < data.length; ++i){
           vector.add(new Float(data[i]));
@@ -121,11 +123,47 @@ public class SenseIdentification {
   
   /**
    * 
+   * @param synsets1
+   * @param synsets2
+   * @return an array of two strings, where each item is a synset
+   */
+  public String[] similarity(List<String> synsets1, List<String> synsets2){
+    String[] res = new String[2];
+    double similarity = 0, maxSimilarity = 0;
+    Collection<Map<String, List<Float>>> nasariEntries = nasari.values();
+    for(String s1 : synsets1){
+      List<Float> vector1 = null;
+      for (Iterator iterator = nasariEntries.iterator(); iterator.hasNext() && vector1 == null;) {
+        Map<String, List<Float>> entry = (Map<String, List<Float>>) iterator.next();
+        vector1 = entry.get(s1);
+      }
+      for(String s2 : synsets2){
+        List<Float> vector2 = null;
+        for (Iterator iterator = nasariEntries.iterator(); iterator.hasNext() && vector2 == null;) {
+          Map<String, List<Float>> entry = (Map<String, List<Float>>) iterator.next();
+          vector2 = entry.get(s2);
+        }
+        similarity = Math.abs(cosineSimilarity(vector1, vector2));
+        if(similarity > maxSimilarity){
+          maxSimilarity = similarity;
+          res[0] = s1;
+          res[1] = s2;
+        }
+      }
+    }
+    return res;
+  }
+  
+  /**
+   * 
    * @param v1
    * @param v2
    * @return cosine similarity for the two vectors
    */
   private double cosineSimilarity(List<Float> v1, List<Float> v2){
+    if(v1 == null || v2 == null){
+      return 0;
+    }
     double num = 0, sum1 = 0, sum2 = 0;
     // suppose both lists have the same lenght (300)
     for(int i = 0; i < v1.size(); ++i){
@@ -142,7 +180,22 @@ public class SenseIdentification {
    * @param args the command line arguments
    */
   public static void main(String[] args) {
-    
+    SenseIdentification si = new SenseIdentification();
+    try {
+      File f = new File("data/it.test.data.txt");
+      Scanner scanner = new Scanner(f);
+      while (scanner.hasNextLine()) {
+        String line = scanner.nextLine();
+        String[] terms = line.split("\t");
+        List<String> synsets1 = si.getSemEval().get(terms[0]);
+        List<String> synsets2 = si.getSemEval().get(terms[1]);
+        String[] senses = si.similarity(synsets1, synsets2);
+        System.out.println(senses[0] + " " + senses[1]);
+      }
+      scanner.close();
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    }
   }
   
 }
