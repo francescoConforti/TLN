@@ -5,8 +5,15 @@
  */
 package senseidentification;
 
+import it.uniroma1.lcl.babelnet.BabelNet;
+import it.uniroma1.lcl.babelnet.BabelSynset;
+import it.uniroma1.lcl.babelnet.BabelSynsetID;
+import it.uniroma1.lcl.babelnet.data.BabelGloss;
+import it.uniroma1.lcl.jlt.util.Language;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -14,6 +21,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -179,22 +188,37 @@ public class SenseIdentification {
   /**
    * @param args the command line arguments
    */
-  public static void main(String[] args) {
+  public static void main(String[] args){
     SenseIdentification si = new SenseIdentification();
+    BabelNet bn = BabelNet.getInstance();
+    int i = 1;
     try {
-      File f = new File("data/it.test.data.txt");
-      Scanner scanner = new Scanner(f);
-      while (scanner.hasNextLine()) {
+      File toRead = new File("data/it.test.data.txt");
+      PrintWriter writer = new PrintWriter("data/results.txt", "UTF-8");
+      Scanner scanner = new Scanner(toRead);
+      while (scanner.hasNextLine() && i <= 100) {
         String line = scanner.nextLine();
         String[] terms = line.split("\t");
         List<String> synsets1 = si.getSemEval().get(terms[0]);
         List<String> synsets2 = si.getSemEval().get(terms[1]);
         String[] senses = si.similarity(synsets1, synsets2);
-        System.out.println(senses[0] + " " + senses[1]);
+        writer.println(i); System.out.println(i);
+        if(senses[0] != null && senses[1] != null){
+          BabelSynset bs1 = bn.getSynset(new BabelSynsetID(senses[0]));
+          BabelSynset bs2 = bn.getSynset(new BabelSynsetID(senses[1]));
+          //List<BabelGloss> glosses1 = bs1.getGlosses(Language.IT);
+          //List<BabelGloss> glosses2 = bs2.getGlosses(Language.IT);
+          List<BabelGloss> glosses1 = bs1.getGlosses();
+          List<BabelGloss> glosses2 = bs2.getGlosses();
+          writer.println(glosses1); System.out.println(glosses1);
+          writer.println(glosses2); System.out.println(glosses2);
+        }
+        ++i;
       }
       scanner.close();
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
+      writer.close();
+    } catch (FileNotFoundException | UnsupportedEncodingException ex) {
+      Logger.getLogger(SenseIdentification.class.getName()).log(Level.SEVERE, null, ex);
     }
   }
   
