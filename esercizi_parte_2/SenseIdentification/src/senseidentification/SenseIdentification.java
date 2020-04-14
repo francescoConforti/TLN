@@ -9,7 +9,6 @@ import it.uniroma1.lcl.babelnet.BabelNet;
 import it.uniroma1.lcl.babelnet.BabelSynset;
 import it.uniroma1.lcl.babelnet.BabelSynsetID;
 import it.uniroma1.lcl.babelnet.data.BabelGloss;
-import it.uniroma1.lcl.jlt.util.Language;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
