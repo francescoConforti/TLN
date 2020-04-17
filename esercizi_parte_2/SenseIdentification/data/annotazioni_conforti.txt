@@ -51,7 +51,7 @@ traduttore  straniero 1.9
 biotopo biologia  2.8
 magma vulcano 2.8
 brainstorming telescopio  0.1
-livello punteggio 1.0
+livello punteggio 2.0
 centesimo affare  1.3
 partito politico  associazione  3.6
 tsunami mare  2.6
