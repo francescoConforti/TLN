@@ -56,39 +56,40 @@ class TwitterClient(object):
         ''' 
         Main function to fetch tweets and parse them. 
         '''
-        # empty list to store parsed tweets
+        if query[0] == '@':
+            fetched_tweets = self.get_tweets_user(query, count)
+        else:
+            fetched_tweets = self.get_tweets_topic(query, count)
+        return self.parse_tweets(fetched_tweets)
+
+    def get_tweets_topic(self, query, count=10):
+        return self.api.search(q=query, count=count)
+
+    def get_tweets_user(self, query, count=10):
+        fetched_tweets = []
+        # call twitter api to fetch tweets
+        for status in tweepy.Cursor(self.api.user_timeline, screen_name=query, tweet_mode="compat").items(count):
+            fetched_tweets.append(status)
+        return fetched_tweets
+
+    def parse_tweets(self, fetched_tweets):
         tweets = []
-
-        try:
-            # call twitter api to fetch tweets
-            fetched_tweets = self.api.search(q=query, count=count)
-
-            # parsing tweets one by one
-            for tweet in fetched_tweets:
-                # empty dictionary to store required params of a tweet
-                parsed_tweet = {}
-
-                # saving text of tweet
-                parsed_tweet['text'] = tweet.text
-                # saving sentiment of tweet
-                parsed_tweet['sentiment'] = self.get_tweet_sentiment(
-                    tweet.text)
-
-                # appending parsed tweet to tweets list
-                if tweet.retweet_count > 0:
-                    # if tweet has retweets, ensure that it is appended only once
-                    if parsed_tweet not in tweets:
-                        tweets.append(parsed_tweet)
-                else:
+        for tweet in fetched_tweets:
+            # empty dictionary to store required params of a tweet
+            parsed_tweet = {}
+            # saving text of tweet
+            parsed_tweet['text'] = tweet.text
+            # saving sentiment of tweet
+            parsed_tweet['sentiment'] = self.get_tweet_sentiment(tweet.text)
+            # appending parsed tweet to tweets list
+            if tweet.retweet_count > 0:
+                # if tweet has retweets, ensure that it is appended only once
+                if parsed_tweet not in tweets:
                     tweets.append(parsed_tweet)
-
+            else:
+                tweets.append(parsed_tweet)
             # return parsed tweets
-            return tweets
-
-        except tweepy.TweepError as e:
-            # print error (if any)
-            print("Error : " + str(e))
-
+        return tweets
 
 def main():
     # creating object of TwitterClient Class
