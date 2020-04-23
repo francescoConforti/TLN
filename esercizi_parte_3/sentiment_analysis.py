@@ -44,7 +44,7 @@ class TwitterClient(object):
         '''
         # create TextBlob object of passed tweet text
         analysis = TextBlob(self.clean_tweet(tweet))
-        # set sentiment
+        #set sentiment
         if analysis.sentiment.polarity > 0:
             return 'positive'
         elif analysis.sentiment.polarity == 0:
@@ -56,7 +56,10 @@ class TwitterClient(object):
         ''' 
         Main function to fetch tweets and parse them. 
         '''
-        if query[0] == '@':
+        
+        if query == "":
+            fetched_tweets = self.get_tweets_trend(count)
+        elif query[0] == '@':
             fetched_tweets = self.get_tweets_user(query, count)
         else:
             fetched_tweets = self.get_tweets_topic(query, count)
@@ -64,6 +67,10 @@ class TwitterClient(object):
 
     def get_tweets_topic(self, query, count=10):
         return self.api.search(q=query, count=count)
+
+    def get_tweets_trend(self, count=10):
+        trends = self.api.trends_place(1)   #worldwide
+        return self.get_tweets_topic(trends[0]["trends"][0]["name"], count)
 
     def get_tweets_user(self, query, count=10):
         fetched_tweets = []
@@ -95,7 +102,7 @@ def main():
     # creating object of TwitterClient Class
     api = TwitterClient()
     # calling function to get tweets
-    tweets = api.get_tweets(query='Donald Trump', count=200)
+    tweets = api.get_tweets(query='', count=200)
 
     # picking positive tweets from tweets
     ptweets = [tweet for tweet in tweets if tweet['sentiment'] == 'positive']
@@ -118,6 +125,7 @@ def main():
     print("\n\nNegative tweets:")
     for tweet in ntweets[:10]:
         print(tweet['text'])
+    
 
 
 if __name__ == "__main__":
