@@ -69,8 +69,8 @@ class TwitterClient(object):
         return self.api.search(q=query, count=count)
 
     def get_tweets_trend(self, count=10):
-        trends = self.api.trends_place(1)   #worldwide
-        return self.get_tweets_topic(trends[0]["trends"][0]["name"], count)
+        trends = self.api.trends_place(2459115)   #new york
+        return self.get_tweets_topic("#" + str(trends[0]["trends"][0]["name"]), count)
 
     def get_tweets_user(self, query, count=10):
         fetched_tweets = []
