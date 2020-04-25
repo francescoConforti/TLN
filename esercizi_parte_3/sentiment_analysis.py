@@ -126,8 +126,7 @@ def main():
     for tweet in ntweets[:10]:
         print(tweet['text'])
     
-
-
+    
 if __name__ == "__main__":
     # calling main function
     main()
