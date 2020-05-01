@@ -1,18 +1,17 @@
 from wordcloud import WordCloud, STOPWORDS
 import matplotlib.pyplot as plt
 import pandas as pd
+import seaborn as sns
 from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.corpus import stopwords
-from nltk.stem import WordNetLemmatizer, PorterStemmer
+from nltk.stem import WordNetLemmatizer
 from string import punctuation
 from collections import OrderedDict
 import re
 import argparse
 import sentiment_analysis
 
-porter = PorterStemmer()
 wnl = WordNetLemmatizer()
-
 
 def tokenize(text):
 
@@ -96,8 +95,8 @@ def main():
         description='Choose what tweets you want visualized, by which sentiment, and how')
     parser.add_argument('-t', '--type', nargs=1, choices=['positive', 'negative', 'neutral'],
                         default=['all'], help="What kind of tweets: positive, neutral, negative or all")
-    parser.add_argument('-v', '--visualization', nargs=1, choices=['wordcloud', 'terminal', 'co_occurrence_matrix', 'correlation_circle'],
-                        default=["wordcloud"], type = str, help="Type of visualization: wordcloud, correlation matrix, correlation circle")
+    parser.add_argument('-v', '--visualization', nargs=1, choices=['wordcloud', 'terminal', 'heatmap', 'correlation_circle'],
+                        default=["wordcloud"], type = str, help="Type of visualization: wordcloud, heatmap, correlation circle")
     parser.add_argument('-q', '--query', nargs=1,
                         help="Tweet query. Default is the first trending topic in New York")
     parser.add_argument('-n', '--number', nargs=1, type=int, default=10,
@@ -127,8 +126,9 @@ def main():
         data = pd.DataFrame.from_dict(coOccurrenceMatrix)
         if args.visualization[0] == "terminal":
             print(data)
-        elif args.visualization[0] == "co_occurrence_matrix":
-            pass
+        elif args.visualization[0] == "heatmap":
+            sns.heatmap(data, xticklabels=True, yticklabels=True)
+            plt.show()
         elif args.visualization[0] == "correlation_circle":
             pass
 
