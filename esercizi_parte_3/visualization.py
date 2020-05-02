@@ -9,6 +9,9 @@ from string import punctuation
 from collections import OrderedDict
 import re
 import argparse
+from gephistreamer import graph
+from gephistreamer import streamer
+import random as rn
 import sentiment_analysis
 
 wnl = WordNetLemmatizer()
@@ -89,6 +92,29 @@ def plot_wordcloud(tweets, sentiment="neutral"):
 
     plt.show()
 
+stream = streamer.Streamer(streamer.GephiWS(hostname="localhost",port=8080,workspace="workspace1"))
+szfak = 100  # this scales up everything - somehow it is needed
+cdfak = 3000
+
+nodedict = {}
+def addfnode(fname):
+  # grab the node out of the dictionary if it is there, otherwise make a newone
+  if (fname in nodedict):
+    nnode = nodedict[fname]
+  else:
+    nnode = graph.Node(fname,size=szfak,x=cdfak*rn.random(),y=cdfak*rn.random(),color="#8080ff",type="f")
+    nodedict[fname] = nnode # new node into the dictionary
+  return nnode
+
+def addnodes(pname,fnodenamelist):
+  pnode = graph.Node(pname,size=szfak,x=cdfak*rn.random(),y=cdfak*rn.random(),color="#ff8080",type="p")
+  stream.add_node(pnode)
+  for fname, fvalue in fnodenamelist.items():
+    print(pname+"-"+fname)
+    fnode = addfnode(fname)
+    stream.add_node(fnode)
+    pfedge = graph.Edge(pnode,fnode,weight=fvalue)
+    stream.add_edge(pfedge)
 
 def main():
     parser = argparse.ArgumentParser(
@@ -130,7 +156,17 @@ def main():
             sns.heatmap(data, xticklabels=True, yticklabels=True)
             plt.show()
         elif args.visualization[0] == "correlation_circle":
-            pass
+            # ***************************************
+            #           IMPORTANT
+            # ***************************************
+            # Make sure the following requirements are satisfied:
+            # Gephi is open
+            # the streaming plugin is installed and active
+            # the server is setup with http on port 8080
+            # the workspace is workspace1
+            # the server is running (green dot)
+            for key, value in coOccurrenceMatrix.items():
+                addnodes(key, value)
 
 if __name__ == "__main__":
     # calling main function
