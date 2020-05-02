@@ -102,19 +102,20 @@ def addfnode(fname):
   if (fname in nodedict):
     nnode = nodedict[fname]
   else:
-    nnode = graph.Node(fname,size=szfak,x=cdfak*rn.random(),y=cdfak*rn.random(),color="#8080ff",type="f")
+    nnode = graph.Node(fname,size=szfak,x=cdfak*rn.random(),y=cdfak*rn.random(),color="#8080ff")
     nodedict[fname] = nnode # new node into the dictionary
   return nnode
 
 def addnodes(pname,fnodenamelist):
-  pnode = graph.Node(pname,size=szfak,x=cdfak*rn.random(),y=cdfak*rn.random(),color="#ff8080",type="p")
+  pnode = graph.Node(pname,size=szfak,x=cdfak*rn.random(),y=cdfak*rn.random(),color="#8080ff")
   stream.add_node(pnode)
   for fname, fvalue in fnodenamelist.items():
-    print(pname+"-"+fname)
-    fnode = addfnode(fname)
-    stream.add_node(fnode)
-    pfedge = graph.Edge(pnode,fnode,weight=fvalue)
-    stream.add_edge(pfedge)
+    if fvalue != 0:
+        print(pname+"-"+fname)
+        fnode = addfnode(fname)
+        stream.add_node(fnode)
+        pfedge = graph.Edge(pnode,fnode,weight=fvalue)
+        stream.add_edge(pfedge)
 
 def main():
     parser = argparse.ArgumentParser(
@@ -165,6 +166,8 @@ def main():
             # the server is setup with http on port 8080
             # the workspace is workspace1
             # the server is running (green dot)
+            # for the best results install the circular layout plugin and select it after graph creation
+            # you can change the color of nodes/edges by degree/weight in the appeareance section
             for key, value in coOccurrenceMatrix.items():
                 addnodes(key, value)
 
