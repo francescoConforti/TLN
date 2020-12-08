@@ -123,6 +123,7 @@ public class Viterbi {
     String path_train = "/home/confo/UNI/magistrale/TLN/esercizi_parte_1/traduttoreDiretto/universal_dependency/ud-treebanks-v2.3/UD_English-LinES/en_lines-ud-train.conllu";
     String path_test = "/home/confo/UNI/magistrale/TLN/esercizi_parte_1/traduttoreDiretto/universal_dependency/ud-treebanks-v2.3/UD_English-LinES/en_lines-ud-test.conllu";
     boolean isSentenceEqual;
+    long startTime = System.currentTimeMillis();
     Map<String, List<Pair>> sentences_test = Reader.treeBankToSentences(path_test);
     Viterbi v = new Viterbi(Reader.treeBankToMap(path_train), Reader.treeBankToTagTransitions(path_train));
     List<Pair> viterbiResult;
@@ -161,8 +162,12 @@ public class Viterbi {
       System.out.println("\n");
       ++numSentence;
     }
+    long endTime = System.currentTimeMillis();
     System.out.println("Performance of Viterbi on test set:");
     System.out.println("Guessed " + equalSentences + " sentences right out of " + totalSentences);
     System.out.println("Guessed " + equalWords + " words right out of " + totalWords + " analyzed (" + (double)equalWords/totalWords + ")");
+    
+    long duration = (endTime - startTime);
+    System.out.println("Time taken: " + duration + " milliseconds");
   }
 }
