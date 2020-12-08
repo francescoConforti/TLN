@@ -39,7 +39,7 @@ public class Traduttore {
       String line;
       String[] splits;
       while ((line = br.readLine()) != null) {
-        splits = line.split(" ");
+        splits = line.split("\t");
         translations.put(splits[0], splits[1]);
       }
     } catch (FileNotFoundException ex) {
@@ -72,9 +72,19 @@ public class Traduttore {
       }
     }
     // Direct translation
-    for(Pair p : viterbi){
+    for(int i = 0; i < viterbi.size(); ++i){
+      Pair p = viterbi.get(i);
       if(translations.get(p.getWord()) != null){
-        output = output + translate(p.getWord()) + " ";
+        if(viterbi.get(i+1) != null){
+          String compositeWord = p.getWord() + " " + viterbi.get(i+1).getWord();
+          if(translations.get(compositeWord) != null){
+            output = output + translate(compositeWord) + " ";
+            ++i;
+          }
+          else{
+            output = output + translate(p.getWord()) + " ";
+          }
+        }
       }
       else if(p.getPos().equals(Pos.PUNCT)){
         output = output + p.getWord() + " ";
@@ -92,7 +102,9 @@ public class Traduttore {
   
   public static void main(String[] args){
     String path_train = "/home/confo/UNI/magistrale/TLN/esercizi_parte_1/traduttoreDiretto/universal_dependency/ud-treebanks-v2.3/UD_English-GUM/en_gum-ud-train.conllu";
-    String input = "The black droid then lowers Vader's mask and helmet onto his head.";
+    //String input = "The black droid then lowers Vader's mask and helmet onto his head.";
+    String input = "These are not the droids you're looking for.";
+    //String input = "Your friends may escape, but you're doomed.";
     input = input.toLowerCase();
     Traduttore t = new Traduttore();
     Viterbi v = new Viterbi(Reader.treeBankToMap(path_train), Reader.treeBankToTagTransitions(path_train));
