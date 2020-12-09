@@ -102,18 +102,22 @@ public class Traduttore {
   
   public static void main(String[] args){
     String path_train = "/home/confo/UNI/magistrale/TLN/esercizi_parte_1/traduttoreDiretto/universal_dependency/ud-treebanks-v2.3/UD_English-GUM/en_gum-ud-train.conllu";
-    //String input = "The black droid then lowers Vader's mask and helmet onto his head.";
-    String input = "These are not the droids you're looking for.";
-    //String input = "Your friends may escape, but you're doomed.";
-    input = input.toLowerCase();
-    Traduttore t = new Traduttore();
-    Viterbi v = new Viterbi(Reader.treeBankToMap(path_train), Reader.treeBankToTagTransitions(path_train));
-    int[] posCount = new int[Pos.values().length];
-    for(int i = 0; i < posCount.length; ++i){
-      posCount[i] = Reader.countPos(Reader.treeBankToMap(path_train), Pos.values()[i].name());
+    String[] input = { "The black droid then lowers Vader's mask and helmet onto his head.",
+                       "These are not the droids you're looking for.",
+                       "Your friends may escape, but you're doomed."};
+    for(int i = 0; i < input.length; ++i){
+      String eng = input[i].toLowerCase();
+      Traduttore t = new Traduttore();
+      Viterbi v = new Viterbi(Reader.treeBankToMap(path_train), Reader.treeBankToTagTransitions(path_train));
+      int[] posCount = new int[Pos.values().length];
+      for(int j = 0; j < posCount.length; ++j){
+        posCount[j] = Reader.countPos(Reader.treeBankToMap(path_train), Pos.values()[j].name());
+      }
+      List<Pair> viterbiResult = v.viterbi(eng, posCount);
+      System.out.println("Frase " + (i+1));
+      System.out.println(viterbiResult);
+      System.out.println(t.translate(viterbiResult));
+      System.out.println("");
     }
-    List<Pair> viterbiResult = v.viterbi(input, posCount);
-    System.out.println(viterbiResult);
-    System.out.println(t.translate(viterbiResult));
   }
 }
