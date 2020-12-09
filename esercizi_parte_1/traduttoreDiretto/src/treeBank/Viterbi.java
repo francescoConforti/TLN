@@ -120,8 +120,9 @@ public class Viterbi {
   }
 
   public static void main(String[] args) {
-    String path_train = "/home/confo/UNI/magistrale/TLN/esercizi_parte_1/traduttoreDiretto/universal_dependency/ud-treebanks-v2.3/UD_English-LinES/en_lines-ud-train.conllu";
-    String path_test = "/home/confo/UNI/magistrale/TLN/esercizi_parte_1/traduttoreDiretto/universal_dependency/ud-treebanks-v2.3/UD_English-LinES/en_lines-ud-test.conllu";
+    String path_train = "./universal_dependency/ud-treebanks-v2.3/UD_English-LinES/en_lines-ud-train.conllu";
+    String path_development = "./universal_dependency/ud-treebanks-v2.3/UD_English-LinES/en_lines-ud-dev.conllu";
+    String path_test = "./universal_dependency/ud-treebanks-v2.3/UD_English-LinES/en_lines-ud-test.conllu";
     boolean isSentenceEqual;
     long startTime = System.currentTimeMillis();
     Map<String, List<Pair>> sentences_test = Reader.treeBankToSentences(path_test);

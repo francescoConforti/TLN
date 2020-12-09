@@ -26,7 +26,7 @@ import treeBank.Viterbi;
  */
 public class Traduttore {
   
-  private final String dictPath = "/home/confo/UNI/magistrale/TLN/esercizi_parte_1/traduttoreDiretto/dizionario/dict.txt";
+  private final String dictPath = "./dizionario/dict.txt";
   private final Map<String, String> translations;
   
   public Traduttore(){
@@ -101,7 +101,7 @@ public class Traduttore {
   }
   
   public static void main(String[] args){
-    String path_train = "/home/confo/UNI/magistrale/TLN/esercizi_parte_1/traduttoreDiretto/universal_dependency/ud-treebanks-v2.3/UD_English-GUM/en_gum-ud-train.conllu";
+    String path_train = "./universal_dependency/ud-treebanks-v2.3/UD_English-GUM/en_gum-ud-train.conllu";
     String[] input = { "The black droid then lowers Vader's mask and helmet onto his head.",
                        "These are not the droids you're looking for.",
                        "Your friends may escape, but you're doomed."};
