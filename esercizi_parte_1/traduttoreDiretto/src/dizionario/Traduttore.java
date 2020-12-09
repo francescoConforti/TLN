@@ -113,8 +113,9 @@ public class Traduttore {
       for(int j = 0; j < posCount.length; ++j){
         posCount[j] = Reader.countPos(Reader.treeBankToMap(path_train), Pos.values()[j].name());
       }
-      List<Pair> viterbiResult = v.viterbi(eng, posCount);
+      List<Pair> viterbiResult = v.viterbi(eng);
       System.out.println("Frase " + (i+1));
+      System.out.println(input[i]);
       System.out.println(viterbiResult);
       System.out.println(t.translate(viterbiResult));
       System.out.println("");

@@ -18,6 +18,7 @@ public class Viterbi {
 
   private final Map<String, Map<String, Integer>> map;
   private final Map<String, Map<String, Integer>> transitions;
+  private int[] posCount;
   private final double NEWWORD = 0.00001;
   private final double NEWPOS = 0.00001;
   private final double NEWTRANS = 0.00001;
@@ -25,9 +26,13 @@ public class Viterbi {
   public Viterbi(Map<String, Map<String, Integer>> corpus, Map<String, Map<String, Integer>> transitions) {
     map = corpus;
     this.transitions = transitions;
+    posCount = new int[Pos.values().length];
+    for(int i = 0; i < posCount.length; ++i){
+      posCount[i] = Reader.countPos(corpus, Pos.values()[i].name());
+    }
   }
 
-  public double posWordProbability(String word, Pos pos, int[] posCount) {
+  public double posWordProbability(String word, Pos pos) {
     double res;
     if (Reader.countWord(map, word) <= 0) { // manage unknown words
       if (pos.equals(Pos.PROPN)) {
@@ -43,13 +48,13 @@ public class Viterbi {
       }
       res = Math.log((wordPos / posCount[pos.ordinal()])+1);
       if (Double.isInfinite(res)) {  // discard infinities caused by log
-        res = 0;
+        res = 0.00001;
       }
     }
     return res;
   }
 
-  public double posPosProbability(Pos pos, Pos precedingPos, int[] posCount) {
+  public double posPosProbability(Pos pos, Pos precedingPos) {
     // add 1 to log to exclude negatives
     double transitionCount = Reader.countTransition(transitions, pos.name(), precedingPos.name());
     if(transitionCount <= 0){
@@ -57,12 +62,12 @@ public class Viterbi {
     }
     double res = Math.log((transitionCount / posCount[precedingPos.ordinal()])+1);
     if (Double.isInfinite(res)) {  // discard infinities caused by log
-      res = 0;
+      res = 0.00001;
     }
     return res;
   }
 
-  public List<Pair> viterbi(String text, int[] posCount) {
+  public List<Pair> viterbi(String text) {
     List<Pair> res = new ArrayList<>();
     String[] words = text.replaceAll("\\s+(?=[!\"#$%&()*+,./:;<=>?@\\^_{|}~`\\[\\]“”])", "").split("\\s+|(?=[!\"#$%&'()*+,./:;<=>?@\\^_{|}~`\\[\\]“”])|(?<=[!\"#$%&()*+,./:;<=>?@\\^_{|}~`\\[\\]“”])");  //split on whitespace and punctuation, keeping punctuation
     double[][] viterbiMatrix = new double[Pos.values().length][words.length]; // Start and End already in Pos (first and last)
@@ -71,8 +76,8 @@ public class Viterbi {
     Pos[] posValues = Pos.values().clone(); // for efficiency
     // initialization step
     for (int s = 1; s < posValues.length - 1; ++s) { // don't consider START and END
-      double a = posPosProbability(posValues[s], Pos.START, posCount);
-      double b = posWordProbability(words[0], posValues[s], posCount);
+      double a = posPosProbability(posValues[s], Pos.START);
+      double b = posWordProbability(words[0], posValues[s]);
       viterbiMatrix[s][0] = a * b;
       backpointer[s][0] = 0;
     }
@@ -80,8 +85,8 @@ public class Viterbi {
     for (int t = 1; t < words.length; ++t) {  // t = 0 in initialization
       for (int s = 1; s < posValues.length - 1; ++s) { // don't consider START and END
         for (int sprec = 1; sprec < posValues.length - 1; ++sprec) {
-          double a = posPosProbability(posValues[s], posValues[sprec], posCount);
-          double b = posWordProbability(words[t], posValues[s], posCount);
+          double a = posPosProbability(posValues[s], posValues[sprec]);
+          double b = posWordProbability(words[t], posValues[s]);
           currentViterbi = viterbiMatrix[sprec][t - 1] * a * b;
           if (currentViterbi > viterbiMatrix[s][t]) {
             viterbiMatrix[s][t] = currentViterbi;
@@ -97,7 +102,7 @@ public class Viterbi {
     }
     // termination step
     for (int s = 1; s < posValues.length - 1; ++s) {
-      double a = posPosProbability(Pos.END, posValues[s], posCount);
+      double a = posPosProbability(Pos.END, posValues[s]);
       currentViterbi = viterbiMatrix[s][words.length - 1] * a;
       if (currentViterbi > viterbiMatrix[s][words.length - 1]) {
         viterbiMatrix[Pos.END.ordinal()][words.length - 1] = currentViterbi;
@@ -121,22 +126,18 @@ public class Viterbi {
 
   public static void main(String[] args) {
     String path_train = "./universal_dependency/ud-treebanks-v2.3/UD_English-LinES/en_lines-ud-train.conllu";
-    String path_development = "./universal_dependency/ud-treebanks-v2.3/UD_English-LinES/en_lines-ud-dev.conllu";
+    //String path_development = "./universal_dependency/ud-treebanks-v2.3/UD_English-LinES/en_lines-ud-dev.conllu";
     String path_test = "./universal_dependency/ud-treebanks-v2.3/UD_English-LinES/en_lines-ud-test.conllu";
     boolean isSentenceEqual;
     long startTime = System.currentTimeMillis();
     Map<String, List<Pair>> sentences_test = Reader.treeBankToSentences(path_test);
     Viterbi v = new Viterbi(Reader.treeBankToMap(path_train), Reader.treeBankToTagTransitions(path_train));
     List<Pair> viterbiResult;
-    Pair viterbiPair = null;
-    Pair entryPair = null;
+    Pair viterbiPair, entryPair;
     int equalSentences = 0, equalWords = 0, totalSentences = sentences_test.size(), totalWords = 0, numSentence = 1;
-    int[] posCount = new int[Pos.values().length];
-    for(int i = 0; i < posCount.length; ++i){
-      posCount[i] = Reader.countPos(Reader.treeBankToMap(path_train), Pos.values()[i].name());
-    }
+    
     for(Map.Entry<String, List<Pair>> entry : sentences_test.entrySet()){
-      viterbiResult = v.viterbi(entry.getKey(), posCount);
+      viterbiResult = v.viterbi(entry.getKey());
       if(viterbiResult.size() == entry.getValue().size()){
         isSentenceEqual = true;
         for(int i = 0; i < viterbiResult.size(); ++i){
